@@ -43,9 +43,8 @@
     header h1 { font-size: 1.25rem; font-weight: 700; }
     header span { font-size: 0.85rem; opacity: 0.8; }
 
-    main { max-width: 1200px; margin: 0 auto; padding: 32px 16px; }
+    main { max-width: 1300px; margin: 0 auto; padding: 32px 16px; }
 
-    /* Upload area */
     .upload-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -84,7 +83,6 @@
     .badge-aamaly { color: var(--aamaly); }
     .badge-fahes  { color: var(--fahes); }
 
-    /* Config row */
     .config-row {
       display: flex;
       flex-wrap: wrap;
@@ -134,7 +132,6 @@
     }
     button.export-btn:hover { background: #eff6ff; }
 
-    /* Summary cards */
     .summary-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -149,17 +146,16 @@
       padding: 20px;
       border-left: 4px solid transparent;
     }
-    .summary-card.matched { border-color: var(--matched); background: var(--matched-bg); }
+    .summary-card.matched    { border-color: var(--matched); background: var(--matched-bg); }
     .summary-card.only-aamaly { border-color: var(--aamaly); background: var(--aamaly-bg); }
-    .summary-card.only-fahes { border-color: var(--fahes); background: var(--fahes-bg); }
+    .summary-card.only-fahes  { border-color: var(--fahes);  background: var(--fahes-bg);  }
     .summary-card .label { font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; }
     .summary-card .count { font-size: 2rem; font-weight: 700; margin: 4px 0; }
-    .summary-card.matched .count { color: var(--matched); }
+    .summary-card.matched .count     { color: var(--matched); }
     .summary-card.only-aamaly .count { color: var(--aamaly); }
-    .summary-card.only-fahes .count { color: var(--fahes); }
+    .summary-card.only-fahes .count  { color: var(--fahes); }
 
-    /* Tabs */
-    .tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 2px solid var(--border); }
+    .tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 2px solid var(--border); flex-wrap: wrap; }
     .tab {
       padding: 10px 20px;
       border: none;
@@ -183,12 +179,13 @@
     }
     .tab.active .pill { background: var(--primary); color: #fff; }
 
-    /* Search */
     .table-toolbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 12px;
+      gap: 10px;
+      flex-wrap: wrap;
     }
     .search-input {
       border: 1px solid var(--border);
@@ -200,7 +197,28 @@
     }
     .search-input:focus { border-color: var(--primary); }
 
-    /* Table */
+    /* Reason filter chips */
+    .reason-filters {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .reason-filters span { font-size: 0.75rem; color: var(--muted); font-weight: 600; }
+    .reason-chip {
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 999px;
+      padding: 3px 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s;
+      color: var(--muted);
+    }
+    .reason-chip:hover { border-color: var(--primary); color: var(--primary); }
+    .reason-chip.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
     .table-wrap {
       overflow-x: auto;
       background: var(--card);
@@ -223,7 +241,7 @@
     tbody tr { border-bottom: 1px solid #f1f5f9; }
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: #f8fafc; }
-    td { padding: 9px 14px; }
+    td { padding: 9px 14px; vertical-align: middle; }
 
     .tag {
       display: inline-block;
@@ -231,20 +249,85 @@
       font-size: 0.72rem;
       font-weight: 600;
       padding: 2px 10px;
+      white-space: nowrap;
     }
-    .tag-matched { background: #dcfce7; color: var(--matched); }
-    .tag-aamaly { background: #fef3c7; color: var(--aamaly); }
-    .tag-fahes { background: #fee2e2; color: var(--fahes); }
+    .tag-matched     { background: #dcfce7; color: var(--matched); }
+    .tag-aamaly      { background: #fef3c7; color: var(--aamaly); }
+    .tag-fahes       { background: #fee2e2; color: var(--fahes); }
 
-    .diff-cell { display: flex; flex-direction: column; gap: 1px; }
-    .diff-a { color: var(--aamaly); font-size: 0.78rem; }
-    .diff-f { color: var(--fahes); font-size: 0.78rem; }
+    /* Reason selector cell */
+    .reason-cell { display: flex; gap: 6px; align-items: center; min-width: 220px; flex-wrap: wrap; }
+
+    .reason-select {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.8rem;
+      background: var(--card);
+      color: var(--text);
+      outline: none;
+      cursor: pointer;
+      flex: 1;
+      min-width: 130px;
+    }
+    .reason-select:focus { border-color: var(--primary); }
+    .reason-select.has-reason { border-color: #a855f7; background: #faf5ff; color: #7e22ce; font-weight: 600; }
+
+    .reason-note-input {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.8rem;
+      background: var(--card);
+      color: var(--text);
+      outline: none;
+      width: 120px;
+    }
+    .reason-note-input:focus { border-color: var(--primary); }
+
+    /* Reason badge (display only) */
+    .reason-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #f3e8ff;
+      color: #7e22ce;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      white-space: nowrap;
+    }
 
     .empty { text-align: center; padding: 48px; color: var(--muted); }
-
     #results { display: none; }
-
     .amount-diff { font-weight: 600; color: var(--fahes); }
+
+    /* Reason legend */
+    .reason-legend {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .reason-legend span { font-size: 0.78rem; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: var(--text);
+    }
+    .legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
   </style>
 </head>
 <body>
@@ -328,15 +411,44 @@
       </div>
     </div>
 
+    <!-- Reason legend -->
+    <div class="reason-legend">
+      <span>Reason Tags:</span>
+      <div class="legend-item"><span class="legend-dot" style="background:#a855f7"></span> Refunded</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#0891b2"></span> Duplicate</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#f59e0b"></span> Pending</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#6366f1"></span> Timing Difference</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#ef4444"></span> Data Error</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#64748b"></span> Under Review</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#10b981"></span> Resolved</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#374151"></span> Other</div>
+      <div style="margin-left:auto; font-size:0.78rem; color:var(--muted)">
+        Tagged: <strong id="tagged-count">0</strong> / <span id="unmatched-count">0</span> unmatched
+      </div>
+    </div>
+
     <div class="tabs">
       <button class="tab active" data-tab="matched">Matched <span class="pill" id="pill-matched">0</span></button>
       <button class="tab" data-tab="only-aamaly">Only Aamaly <span class="pill" id="pill-aamaly">0</span></button>
       <button class="tab" data-tab="only-fahes">Only Fahes <span class="pill" id="pill-fahes">0</span></button>
+      <button class="tab" data-tab="untagged">Untagged <span class="pill" id="pill-untagged">0</span></button>
       <button class="tab" data-tab="all">All <span class="pill" id="pill-all">0</span></button>
     </div>
 
     <div class="table-toolbar">
       <input class="search-input" id="search" placeholder="🔍  Search transactions…" />
+      <div class="reason-filters" id="reason-filters">
+        <span>Filter:</span>
+        <button class="reason-chip active" data-reason="">All</button>
+        <button class="reason-chip" data-reason="Refunded">Refunded</button>
+        <button class="reason-chip" data-reason="Duplicate">Duplicate</button>
+        <button class="reason-chip" data-reason="Pending">Pending</button>
+        <button class="reason-chip" data-reason="Timing Difference">Timing Diff</button>
+        <button class="reason-chip" data-reason="Data Error">Data Error</button>
+        <button class="reason-chip" data-reason="Under Review">Under Review</button>
+        <button class="reason-chip" data-reason="Resolved">Resolved</button>
+        <button class="reason-chip" data-reason="Other">Other</button>
+      </div>
     </div>
 
     <div class="table-wrap">
@@ -350,11 +462,26 @@
 </main>
 
 <script>
-// ─── State ───────────────────────────────────────────────────────────────────
+// ─── Constants ────────────────────────────────────────────────────────────────
+const REASONS = ['', 'Refunded', 'Duplicate', 'Pending', 'Timing Difference', 'Data Error', 'Under Review', 'Resolved', 'Other'];
+
+const REASON_COLORS = {
+  'Refunded':          '#a855f7',
+  'Duplicate':         '#0891b2',
+  'Pending':           '#f59e0b',
+  'Timing Difference': '#6366f1',
+  'Data Error':        '#ef4444',
+  'Under Review':      '#64748b',
+  'Resolved':          '#10b981',
+  'Other':             '#374151',
+};
+
+// ─── State ────────────────────────────────────────────────────────────────────
 let dataAamaly = [], dataFahes = [];
 let headAamaly = [], headFahes = [];
-let allRows = [];      // [{status, aamalyRow, fahesRow, key}]
+let allRows = [];
 let activeTab = 'matched';
+let activeReasonFilter = '';
 
 // ─── File Loading ─────────────────────────────────────────────────────────────
 function readFile(file, cb) {
@@ -409,7 +536,6 @@ document.getElementById('file-fahes').addEventListener('change', e => {
   });
 });
 
-// Drag & drop
 ['aamaly','fahes'].forEach(side => {
   const drop = document.getElementById(`drop-${side}`);
   drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag-over'); });
@@ -417,17 +543,18 @@ document.getElementById('file-fahes').addEventListener('change', e => {
   drop.addEventListener('drop', e => {
     e.preventDefault(); drop.classList.remove('drag-over');
     const file = e.dataTransfer.files[0];
-    if (file) document.getElementById(`file-${side}`).files = e.dataTransfer.files,
-              document.getElementById(`file-${side}`).dispatchEvent(new Event('change'));
+    if (file) {
+      document.getElementById(`file-${side}`).files = e.dataTransfer.files;
+      document.getElementById(`file-${side}`).dispatchEvent(new Event('change'));
+    }
   });
 });
 
 function checkReady() {
-  const ok = dataAamaly.length && dataFahes.length;
-  document.getElementById('reconcile').disabled = !ok;
+  document.getElementById('reconcile').disabled = !(dataAamaly.length && dataFahes.length);
 }
 
-// ─── Normalization ────────────────────────────────────────────────────────────
+// ─── Normalize ────────────────────────────────────────────────────────────────
 function normalize(val, mode) {
   let s = String(val ?? '');
   if (mode === 'trim' || mode === 'both') s = s.trim();
@@ -452,39 +579,31 @@ document.getElementById('reconcile').addEventListener('click', () => {
     fahesMap.get(key).push(row);
   });
 
-  const usedFahesKeys = new Set();
   allRows = [];
 
   dataAamaly.forEach(rowA => {
     const key = normalize(rowA[colA], mode);
     if (fahesMap.has(key) && fahesMap.get(key).length) {
       const rowF = fahesMap.get(key).shift();
-      usedFahesKeys.add(key);
-      const amtMatch = amtA && amtF
-        ? parseNum(rowA[amtA]) === parseNum(rowF[amtF])
-        : true;
-      allRows.push({ status: amtMatch ? 'matched' : 'matched-diff', key: rowA[colA], aamalyRow: rowA, fahesRow: rowF,
-                     amtA: amtA ? rowA[amtA] : null, amtF: amtF ? rowF[amtF] : null });
+      const amtMatch = amtA && amtF ? parseNum(rowA[amtA]) === parseNum(rowF[amtF]) : true;
+      allRows.push({
+        status: amtMatch ? 'matched' : 'matched-diff',
+        key: rowA[colA], aamalyRow: rowA, fahesRow: rowF,
+        reason: '', note: ''
+      });
     } else {
-      allRows.push({ status: 'only-aamaly', key: rowA[colA], aamalyRow: rowA, fahesRow: null });
+      allRows.push({ status: 'only-aamaly', key: rowA[colA], aamalyRow: rowA, fahesRow: null, reason: '', note: '' });
     }
   });
 
-  dataFahes.forEach(rowF => {
-    const key = normalize(rowF[colF], mode);
-    if (!usedFahesKeys.has(key) || fahesMap.get(key)?.length > 0) {
-      // check if any remaining in map
-    }
-  });
-
-  // Collect unmatched fahes
-  fahesMap.forEach((remaining) => {
+  fahesMap.forEach(remaining => {
     remaining.forEach(rowF => {
-      allRows.push({ status: 'only-fahes', key: rowF[colF], aamalyRow: null, fahesRow: rowF });
+      allRows.push({ status: 'only-fahes', key: rowF[colF], aamalyRow: null, fahesRow: rowF, reason: '', note: '' });
     });
   });
 
-  renderResults(colA, colF, amtA, amtF);
+  window._reconcileState = { colA, colF, amtA, amtF };
+  renderResults();
 });
 
 function parseNum(v) {
@@ -492,27 +611,33 @@ function parseNum(v) {
   return isNaN(n) ? null : n;
 }
 
-// ─── Render ───────────────────────────────────────────────────────────────────
-function renderResults(colA, colF, amtA, amtF) {
-  const matched = allRows.filter(r => r.status === 'matched' || r.status === 'matched-diff');
-  const onlyA   = allRows.filter(r => r.status === 'only-aamaly');
-  const onlyF   = allRows.filter(r => r.status === 'only-fahes');
+// ─── Render Results ───────────────────────────────────────────────────────────
+function renderResults() {
+  const matched  = allRows.filter(r => r.status === 'matched' || r.status === 'matched-diff');
+  const onlyA    = allRows.filter(r => r.status === 'only-aamaly');
+  const onlyF    = allRows.filter(r => r.status === 'only-fahes');
+  const unmatched = [...onlyA, ...onlyF];
+  const tagged   = unmatched.filter(r => r.reason);
+  const untagged = unmatched.filter(r => !r.reason);
 
-  document.getElementById('cnt-matched').textContent = matched.length;
-  document.getElementById('cnt-aamaly').textContent  = onlyA.length;
-  document.getElementById('cnt-fahes').textContent   = onlyF.length;
-  document.getElementById('pill-matched').textContent = matched.length;
-  document.getElementById('pill-aamaly').textContent  = onlyA.length;
-  document.getElementById('pill-fahes').textContent   = onlyF.length;
-  document.getElementById('pill-all').textContent     = allRows.length;
+  document.getElementById('cnt-matched').textContent  = matched.length;
+  document.getElementById('cnt-aamaly').textContent   = onlyA.length;
+  document.getElementById('cnt-fahes').textContent    = onlyF.length;
+  document.getElementById('pill-matched').textContent  = matched.length;
+  document.getElementById('pill-aamaly').textContent   = onlyA.length;
+  document.getElementById('pill-fahes').textContent    = onlyF.length;
+  document.getElementById('pill-untagged').textContent = untagged.length;
+  document.getElementById('pill-all').textContent      = allRows.length;
+  document.getElementById('tagged-count').textContent  = tagged.length;
+  document.getElementById('unmatched-count').textContent = unmatched.length;
 
   document.getElementById('results').style.display = 'block';
   document.getElementById('export-btn').style.display = '';
 
-  window._reconcileState = { colA, colF, amtA, amtF };
   renderTable();
 }
 
+// ─── Filter ───────────────────────────────────────────────────────────────────
 function getVisible() {
   const q = document.getElementById('search').value.toLowerCase().trim();
   let rows = allRows;
@@ -520,31 +645,34 @@ function getVisible() {
   if (activeTab === 'matched')      rows = rows.filter(r => r.status === 'matched' || r.status === 'matched-diff');
   else if (activeTab === 'only-aamaly') rows = rows.filter(r => r.status === 'only-aamaly');
   else if (activeTab === 'only-fahes')  rows = rows.filter(r => r.status === 'only-fahes');
+  else if (activeTab === 'untagged')    rows = rows.filter(r => (r.status === 'only-aamaly' || r.status === 'only-fahes') && !r.reason);
 
+  if (activeReasonFilter) rows = rows.filter(r => r.reason === activeReasonFilter);
   if (q) rows = rows.filter(r => JSON.stringify(r).toLowerCase().includes(q));
   return rows;
 }
 
+// ─── Render Table ─────────────────────────────────────────────────────────────
 function renderTable() {
   const { colA, colF, amtA, amtF } = window._reconcileState || {};
   const visible = getVisible();
+  const isUnmatchedTab = (activeTab !== 'matched');
 
-  // Build header columns
-  const aHeaders = headAamaly.filter(h => h !== colA);
-  const fHeaders = headFahes.filter(h => h !== colF);
-  const sharedCols = [...new Set([...aHeaders.slice(0, 6)])];
-  const fOnlyCols  = fHeaders.filter(h => !sharedCols.includes(h)).slice(0, 4);
+  const aHeaders = headAamaly.filter(h => h !== colA).slice(0, 5);
+  const fHeaders = headFahes.filter(h => h !== colF).filter(h => !aHeaders.includes(h)).slice(0, 3);
 
   const thead = document.getElementById('tbl-head');
   thead.innerHTML = '';
   const tr = document.createElement('tr');
 
   const cols = ['Status', 'Match Key'];
-  if (amtA) cols.push('Aamaly Amount');
-  if (amtF) cols.push('Fahes Amount');
+  if (amtA) cols.push('Aamaly Amt');
+  if (amtF) cols.push('Fahes Amt');
   if (amtA && amtF) cols.push('Diff');
-  sharedCols.forEach(c => cols.push('A: ' + c));
-  fOnlyCols.forEach(c => cols.push('F: ' + c));
+  aHeaders.forEach(c => cols.push('A: ' + c));
+  fHeaders.forEach(c => cols.push('F: ' + c));
+  cols.push('Reason');
+  cols.push('Notes');
 
   cols.forEach(c => { const th = document.createElement('th'); th.textContent = c; tr.appendChild(th); });
   thead.appendChild(tr);
@@ -558,24 +686,26 @@ function renderTable() {
     tbody.appendChild(row); return;
   }
 
-  visible.forEach(r => {
+  visible.forEach((r, visIdx) => {
+    const globalIdx = allRows.indexOf(r);
+    const isUnmatched = r.status === 'only-aamaly' || r.status === 'only-fahes';
     const tr = document.createElement('tr');
     const cells = [];
 
-    // Status
-    let tag = '';
-    if (r.status === 'matched') tag = '<span class="tag tag-matched">✓ Matched</span>';
-    else if (r.status === 'matched-diff') tag = '<span class="tag tag-aamaly">⚠ Amt Diff</span>';
-    else if (r.status === 'only-aamaly') tag = '<span class="tag tag-aamaly">Aamaly only</span>';
-    else tag = '<span class="tag tag-fahes">Fahes only</span>';
-    cells.push(tag);
+    // Status tag
+    let statusTag = '';
+    if      (r.status === 'matched')      statusTag = '<span class="tag tag-matched">✓ Matched</span>';
+    else if (r.status === 'matched-diff') statusTag = '<span class="tag tag-aamaly">⚠ Amt Diff</span>';
+    else if (r.status === 'only-aamaly')  statusTag = '<span class="tag tag-aamaly">Aamaly only</span>';
+    else                                   statusTag = '<span class="tag tag-fahes">Fahes only</span>';
+    cells.push(statusTag);
 
     cells.push(escHtml(r.key));
 
     const numA = amtA ? parseNum(r.aamalyRow?.[amtA]) : null;
-    const numF = amtF ? parseNum(r.fahesRow?.[amtF]) : null;
+    const numF = amtF ? parseNum(r.fahesRow?.[amtF])  : null;
     if (amtA) cells.push(r.aamalyRow ? fmt(numA, r.aamalyRow[amtA]) : '—');
-    if (amtF) cells.push(r.fahesRow  ? fmt(numF, r.fahesRow[amtF]) : '—');
+    if (amtF) cells.push(r.fahesRow  ? fmt(numF, r.fahesRow[amtF])  : '—');
     if (amtA && amtF) {
       if (numA !== null && numF !== null) {
         const d = numA - numF;
@@ -583,24 +713,78 @@ function renderTable() {
       } else cells.push('—');
     }
 
-    sharedCols.forEach(c => cells.push(escHtml(r.aamalyRow?.[c] ?? '—')));
-    fOnlyCols.forEach(c => cells.push(escHtml(r.fahesRow?.[c] ?? '—')));
+    aHeaders.forEach(c => cells.push(escHtml(r.aamalyRow?.[c] ?? '—')));
+    fHeaders.forEach(c => cells.push(escHtml(r.fahesRow?.[c]  ?? '—')));
+
+    // Reason cell
+    if (isUnmatched) {
+      const color = REASON_COLORS[r.reason] || '';
+      const reasonOpts = REASONS.map(rv =>
+        `<option value="${rv}" ${rv === r.reason ? 'selected' : ''}>${rv || '— select reason —'}</option>`
+      ).join('');
+      cells.push(
+        `<div class="reason-cell">
+          <select class="reason-select ${r.reason ? 'has-reason' : ''}"
+                  style="${r.reason ? `border-color:${color};background:${color}11;color:${color}` : ''}"
+                  data-idx="${globalIdx}" onchange="setReason(this)">
+            ${reasonOpts}
+          </select>
+        </div>`
+      );
+      cells.push(
+        `<input class="reason-note-input" type="text"
+               placeholder="Add note…"
+               value="${escHtml(r.note || '')}"
+               data-idx="${globalIdx}"
+               onchange="setNote(this)"
+               oninput="setNote(this)" />`
+      );
+    } else {
+      // Matched rows — show reason badge if any, otherwise dash
+      cells.push(r.reason
+        ? `<span class="reason-badge" style="background:${REASON_COLORS[r.reason]}22;color:${REASON_COLORS[r.reason]}">${escHtml(r.reason)}</span>`
+        : '—');
+      cells.push(r.note ? escHtml(r.note) : '—');
+    }
 
     tr.innerHTML = cells.map(c => `<td>${c}</td>`).join('');
     tbody.appendChild(tr);
   });
 }
 
-function fmt(num, raw) {
-  if (num !== null) return Number(num).toLocaleString();
-  return escHtml(String(raw ?? ''));
+// ─── Reason / Note handlers ───────────────────────────────────────────────────
+function setReason(sel) {
+  const idx = parseInt(sel.dataset.idx);
+  allRows[idx].reason = sel.value;
+  const color = REASON_COLORS[sel.value] || '';
+  if (sel.value) {
+    sel.classList.add('has-reason');
+    sel.style.borderColor = color;
+    sel.style.background  = color + '22';
+    sel.style.color       = color;
+  } else {
+    sel.classList.remove('has-reason');
+    sel.style.borderColor = '';
+    sel.style.background  = '';
+    sel.style.color       = '';
+  }
+  updateTaggedCount();
 }
 
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function setNote(input) {
+  const idx = parseInt(input.dataset.idx);
+  allRows[idx].note = input.value;
 }
 
-// Tabs
+function updateTaggedCount() {
+  const unmatched = allRows.filter(r => r.status === 'only-aamaly' || r.status === 'only-fahes');
+  const tagged    = unmatched.filter(r => r.reason);
+  const untagged  = unmatched.filter(r => !r.reason);
+  document.getElementById('tagged-count').textContent   = tagged.length;
+  document.getElementById('pill-untagged').textContent  = untagged.length;
+}
+
+// ─── Tabs ─────────────────────────────────────────────────────────────────────
 document.querySelectorAll('.tab').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
@@ -610,7 +794,17 @@ document.querySelectorAll('.tab').forEach(btn => {
   });
 });
 
-// Search
+// ─── Reason filter chips ──────────────────────────────────────────────────────
+document.querySelectorAll('.reason-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.reason-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    activeReasonFilter = chip.dataset.reason;
+    renderTable();
+  });
+});
+
+// ─── Search ───────────────────────────────────────────────────────────────────
 document.getElementById('search').addEventListener('input', renderTable);
 
 // ─── Export ───────────────────────────────────────────────────────────────────
@@ -618,12 +812,12 @@ document.getElementById('export-btn').addEventListener('click', () => {
   const { colA, colF, amtA, amtF } = window._reconcileState || {};
   const wb = XLSX.utils.book_new();
 
-  const toSheet = (rows) => {
+  const toSheet = rows => {
     if (!rows.length) return XLSX.utils.aoa_to_sheet([['No data']]);
     return XLSX.utils.json_to_sheet(rows.map(r => {
-      const obj = { Status: r.status, MatchKey: r.key };
-      if (r.aamalyRow) headAamaly.forEach(h => obj['A_'+h] = r.aamalyRow[h]);
-      if (r.fahesRow)  headFahes.forEach(h  => obj['F_'+h]  = r.fahesRow[h]);
+      const obj = { Status: r.status, MatchKey: r.key, Reason: r.reason || '', Notes: r.note || '' };
+      if (r.aamalyRow) headAamaly.forEach(h => obj['A_' + h] = r.aamalyRow[h]);
+      if (r.fahesRow)  headFahes.forEach(h  => obj['F_' + h]  = r.fahesRow[h]);
       if (amtA && amtF) obj['Amount_Diff'] = (parseNum(r.aamalyRow?.[amtA]) ?? 0) - (parseNum(r.fahesRow?.[amtF]) ?? 0);
       return obj;
     }));
@@ -632,9 +826,27 @@ document.getElementById('export-btn').addEventListener('click', () => {
   XLSX.utils.book_append_sheet(wb, toSheet(allRows.filter(r => r.status==='matched'||r.status==='matched-diff')), 'Matched');
   XLSX.utils.book_append_sheet(wb, toSheet(allRows.filter(r => r.status==='only-aamaly')), 'Only_Aamaly');
   XLSX.utils.book_append_sheet(wb, toSheet(allRows.filter(r => r.status==='only-fahes')),  'Only_Fahes');
+
+  // Breakdown by reason
+  const reasons = [...new Set(allRows.map(r => r.reason).filter(Boolean))];
+  reasons.forEach(rsn => {
+    const name = rsn.replace(/[^a-zA-Z0-9]/g,'_').slice(0,28);
+    XLSX.utils.book_append_sheet(wb, toSheet(allRows.filter(r => r.reason===rsn)), name);
+  });
+
   XLSX.utils.book_append_sheet(wb, toSheet(allRows), 'All');
   XLSX.writeFile(wb, `reconciliation_${new Date().toISOString().slice(0,10)}.xlsx`);
 });
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function fmt(num, raw) {
+  if (num !== null) return Number(num).toLocaleString();
+  return escHtml(String(raw ?? ''));
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 </script>
 </body>
 </html>
