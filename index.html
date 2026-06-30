@@ -132,6 +132,20 @@
     }
     button.export-btn:hover { background: #eff6ff; }
 
+    button#clear-btn {
+      background: #fff;
+      color: #dc2626;
+      border: 1px solid #dc2626;
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+      align-self: flex-end;
+    }
+    button#clear-btn:hover { background: #fef2f2; }
+
     .summary-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -389,6 +403,7 @@
     </div>
     <button id="reconcile" disabled>Run Reconciliation</button>
     <button class="export-btn" id="export-btn" style="display:none">⬇ Export Excel</button>
+    <button id="clear-btn" style="display:none">✕ Clear &amp; Reset</button>
   </div>
 
   <!-- Results -->
@@ -633,6 +648,7 @@ function renderResults() {
 
   document.getElementById('results').style.display = 'block';
   document.getElementById('export-btn').style.display = '';
+  document.getElementById('clear-btn').style.display = '';
 
   renderTable();
 }
@@ -836,6 +852,44 @@ document.getElementById('export-btn').addEventListener('click', () => {
 
   XLSX.utils.book_append_sheet(wb, toSheet(allRows), 'All');
   XLSX.writeFile(wb, `reconciliation_${new Date().toISOString().slice(0,10)}.xlsx`);
+});
+
+// ─── Clear & Reset ────────────────────────────────────────────────────────────
+document.getElementById('clear-btn').addEventListener('click', () => {
+  // Reset data
+  dataAamaly = []; dataFahes = [];
+  headAamaly = []; headFahes = [];
+  allRows = [];
+  activeTab = 'matched';
+  activeReasonFilter = '';
+  window._reconcileState = null;
+
+  // Reset file inputs & labels
+  ['aamaly','fahes'].forEach(side => {
+    document.getElementById(`file-${side}`).value = '';
+    document.getElementById(`name-${side}`).textContent = 'No file selected';
+  });
+
+  // Reset column selects
+  ['col-aamaly','col-fahes','amt-aamaly','amt-fahes'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = `<option value="">— load file first —</option>`;
+  });
+
+  // Reset search & reason filter chips
+  document.getElementById('search').value = '';
+  document.querySelectorAll('.reason-chip').forEach(c => c.classList.remove('active'));
+  document.querySelector('.reason-chip[data-reason=""]').classList.add('active');
+
+  // Reset tabs
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.querySelector('.tab[data-tab="matched"]').classList.add('active');
+
+  // Hide results & buttons
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('export-btn').style.display = 'none';
+  document.getElementById('clear-btn').style.display = 'none';
+  document.getElementById('reconcile').disabled = true;
 });
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
