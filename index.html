@@ -25,323 +25,149 @@
       --radius: 10px;
     }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-    header {
-      background: var(--primary);
-      color: #fff;
-      padding: 18px 32px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    header { background: var(--primary); color: #fff; padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; }
     header h1 { font-size: 1.25rem; font-weight: 700; }
     header span { font-size: 0.85rem; opacity: 0.8; }
 
     main { max-width: 1300px; margin: 0 auto; padding: 32px 16px; }
 
-    .upload-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 24px;
-    }
+    .upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
     @media (max-width: 640px) { .upload-grid { grid-template-columns: 1fr; } }
 
     .upload-card {
-      background: var(--card);
-      border: 2px dashed var(--border);
-      border-radius: var(--radius);
-      padding: 28px 20px;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color .2s, background .2s;
-      position: relative;
+      background: var(--card); border: 2px dashed var(--border); border-radius: var(--radius);
+      padding: 28px 20px; text-align: center; cursor: pointer;
+      transition: border-color .2s, background .2s; position: relative;
     }
-    .upload-card:hover, .upload-card.drag-over {
-      border-color: var(--primary);
-      background: #eff6ff;
-    }
-    .upload-card input[type="file"] {
-      position: absolute; inset: 0; opacity: 0; cursor: pointer;
-    }
+    .upload-card:hover, .upload-card.drag-over { border-color: var(--primary); background: #eff6ff; }
+    .upload-card input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
     .upload-card .icon { font-size: 2.5rem; margin-bottom: 10px; }
     .upload-card h2 { font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
     .upload-card p { font-size: 0.8rem; color: var(--muted); }
-    .upload-card .file-name {
-      margin-top: 10px;
-      font-size: 0.82rem;
-      color: var(--primary);
-      font-weight: 500;
-      word-break: break-all;
-    }
+    .upload-card .file-name { margin-top: 10px; font-size: 0.82rem; color: var(--primary); font-weight: 500; word-break: break-all; }
     .badge-aamaly { color: var(--aamaly); }
     .badge-fahes  { color: var(--fahes); }
 
-    .config-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: flex-end;
-      margin-bottom: 24px;
-    }
-    .config-group { display: flex; flex-direction: column; gap: 4px; min-width: 180px; }
+    .config-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 24px; }
+    .config-group { display: flex; flex-direction: column; gap: 4px; min-width: 170px; }
     .config-group label { font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
-    .config-group select, .config-group input {
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 8px 10px;
-      font-size: 0.9rem;
-      background: var(--card);
-      color: var(--text);
-      outline: none;
-    }
-    .config-group select:focus, .config-group input:focus { border-color: var(--primary); }
+    .config-group select { border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-size: 0.9rem; background: var(--card); color: var(--text); outline: none; }
+    .config-group select:focus { border-color: var(--primary); }
 
     button#reconcile {
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 28px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background .2s;
-      align-self: flex-end;
+      background: var(--primary); color: #fff; border: none; border-radius: 8px;
+      padding: 10px 28px; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+      transition: background .2s; align-self: flex-end;
     }
     button#reconcile:hover { background: var(--primary-hover); }
     button#reconcile:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    button.export-btn {
-      background: #fff;
-      color: var(--primary);
-      border: 1px solid var(--primary);
-      border-radius: 8px;
-      padding: 8px 20px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background .2s;
-      align-self: flex-end;
+    .action-btn {
+      border-radius: 8px; padding: 10px 20px; font-size: 0.88rem; font-weight: 600;
+      cursor: pointer; transition: background .2s; align-self: flex-end; border: none;
     }
-    button.export-btn:hover { background: #eff6ff; }
+    #auto-suggest-btn { background: #7c3aed; color: #fff; }
+    #auto-suggest-btn:hover { background: #6d28d9; }
+    #export-btn { background: #fff; color: var(--primary); border: 1px solid var(--primary); }
+    #export-btn:hover { background: #eff6ff; }
+    #clear-btn { background: #fff; color: #dc2626; border: 1px solid #dc2626; }
+    #clear-btn:hover { background: #fef2f2; }
 
-    button#clear-btn {
-      background: #fff;
-      color: #dc2626;
-      border: 1px solid #dc2626;
-      border-radius: 8px;
-      padding: 8px 20px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background .2s;
-      align-self: flex-end;
-    }
-    button#clear-btn:hover { background: #fef2f2; }
-
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-bottom: 24px;
-    }
+    .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
     @media (max-width: 640px) { .summary-grid { grid-template-columns: 1fr; } }
 
-    .summary-card {
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: 20px;
-      border-left: 4px solid transparent;
-    }
+    .summary-card { background: var(--card); border-radius: var(--radius); padding: 20px; border-left: 4px solid transparent; }
     .summary-card.matched    { border-color: var(--matched); background: var(--matched-bg); }
     .summary-card.only-aamaly { border-color: var(--aamaly); background: var(--aamaly-bg); }
-    .summary-card.only-fahes  { border-color: var(--fahes);  background: var(--fahes-bg);  }
+    .summary-card.only-fahes  { border-color: var(--fahes);  background: var(--fahes-bg); }
     .summary-card .label { font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; }
     .summary-card .count { font-size: 2rem; font-weight: 700; margin: 4px 0; }
     .summary-card.matched .count     { color: var(--matched); }
     .summary-card.only-aamaly .count { color: var(--aamaly); }
     .summary-card.only-fahes .count  { color: var(--fahes); }
 
+    /* Auto-suggest banner */
+    .suggest-banner {
+      background: linear-gradient(135deg, #ede9fe, #dbeafe);
+      border: 1px solid #c4b5fd;
+      border-radius: var(--radius);
+      padding: 14px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .suggest-banner .icon { font-size: 1.5rem; }
+    .suggest-banner .text { flex: 1; }
+    .suggest-banner .text strong { color: #5b21b6; display: block; font-size: 0.95rem; }
+    .suggest-banner .text span { font-size: 0.82rem; color: var(--muted); }
+    .suggest-stat { background: #fff; border-radius: 8px; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; color: #5b21b6; border: 1px solid #c4b5fd; white-space: nowrap; }
+
+    /* Reason legend */
+    .reason-legend {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 14px 20px; margin-bottom: 20px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
+    }
+    .reason-legend > span { font-size: 0.78rem; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.79rem; color: var(--text); }
+    .legend-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+
     .tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 2px solid var(--border); flex-wrap: wrap; }
-    .tab {
-      padding: 10px 20px;
-      border: none;
-      background: none;
-      font-size: 0.9rem;
-      font-weight: 500;
-      cursor: pointer;
-      color: var(--muted);
-      border-bottom: 2px solid transparent;
-      margin-bottom: -2px;
-      transition: color .15s, border-color .15s;
-    }
+    .tab { padding: 10px 20px; border: none; background: none; font-size: 0.9rem; font-weight: 500; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color .15s, border-color .15s; }
     .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
-    .tab .pill {
-      display: inline-block;
-      background: var(--border);
-      border-radius: 999px;
-      font-size: 0.72rem;
-      padding: 1px 7px;
-      margin-left: 6px;
-    }
+    .tab .pill { display: inline-block; background: var(--border); border-radius: 999px; font-size: 0.72rem; padding: 1px 7px; margin-left: 6px; }
     .tab.active .pill { background: var(--primary); color: #fff; }
 
-    .table-toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .search-input {
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 7px 12px;
-      font-size: 0.88rem;
-      width: 260px;
-      outline: none;
-    }
+    .table-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 10px; flex-wrap: wrap; }
+    .search-input { border: 1px solid var(--border); border-radius: 6px; padding: 7px 12px; font-size: 0.88rem; width: 240px; outline: none; }
     .search-input:focus { border-color: var(--primary); }
 
-    /* Reason filter chips */
-    .reason-filters {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .reason-filters span { font-size: 0.75rem; color: var(--muted); font-weight: 600; }
-    .reason-chip {
-      border: 1px solid var(--border);
-      background: var(--card);
-      border-radius: 999px;
-      padding: 3px 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all .15s;
-      color: var(--muted);
-    }
+    .reason-filters { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .reason-filters > span { font-size: 0.75rem; color: var(--muted); font-weight: 600; }
+    .reason-chip { border: 1px solid var(--border); background: var(--card); border-radius: 999px; padding: 3px 12px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all .15s; color: var(--muted); }
     .reason-chip:hover { border-color: var(--primary); color: var(--primary); }
     .reason-chip.active { background: var(--primary); border-color: var(--primary); color: #fff; }
 
-    .table-wrap {
-      overflow-x: auto;
-      background: var(--card);
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-    }
+    .table-wrap { overflow-x: auto; background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); }
     table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-    thead th {
-      background: #f8fafc;
-      padding: 10px 14px;
-      text-align: left;
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .04em;
-      color: var(--muted);
-      border-bottom: 1px solid var(--border);
-      white-space: nowrap;
-    }
+    thead th { background: #f8fafc; padding: 10px 14px; text-align: left; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); border-bottom: 1px solid var(--border); white-space: nowrap; }
     tbody tr { border-bottom: 1px solid #f1f5f9; }
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: #f8fafc; }
     td { padding: 9px 14px; vertical-align: middle; }
 
-    .tag {
-      display: inline-block;
-      border-radius: 999px;
-      font-size: 0.72rem;
-      font-weight: 600;
-      padding: 2px 10px;
-      white-space: nowrap;
-    }
-    .tag-matched     { background: #dcfce7; color: var(--matched); }
-    .tag-aamaly      { background: #fef3c7; color: var(--aamaly); }
-    .tag-fahes       { background: #fee2e2; color: var(--fahes); }
+    .tag { display: inline-block; border-radius: 999px; font-size: 0.72rem; font-weight: 600; padding: 2px 10px; white-space: nowrap; }
+    .tag-matched  { background: #dcfce7; color: var(--matched); }
+    .tag-aamaly   { background: #fef3c7; color: var(--aamaly); }
+    .tag-fahes    { background: #fee2e2; color: var(--fahes); }
 
-    /* Reason selector cell */
-    .reason-cell { display: flex; gap: 6px; align-items: center; min-width: 220px; flex-wrap: wrap; }
+    .reason-cell { display: flex; flex-direction: column; gap: 4px; min-width: 200px; }
 
-    .reason-select {
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 4px 8px;
-      font-size: 0.8rem;
-      background: var(--card);
-      color: var(--text);
-      outline: none;
-      cursor: pointer;
-      flex: 1;
-      min-width: 130px;
-    }
+    .reason-select { border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 0.8rem; background: var(--card); color: var(--text); outline: none; cursor: pointer; width: 100%; }
     .reason-select:focus { border-color: var(--primary); }
-    .reason-select.has-reason { border-color: #a855f7; background: #faf5ff; color: #7e22ce; font-weight: 600; }
+    .reason-select.has-reason { font-weight: 600; }
 
-    .reason-note-input {
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 4px 8px;
-      font-size: 0.8rem;
-      background: var(--card);
-      color: var(--text);
-      outline: none;
-      width: 120px;
-    }
+    .reason-note-input { border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 0.79rem; background: var(--card); color: var(--text); outline: none; width: 100%; }
     .reason-note-input:focus { border-color: var(--primary); }
 
-    /* Reason badge (display only) */
-    .reason-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      background: #f3e8ff;
-      color: #7e22ce;
-      border-radius: 999px;
-      font-size: 0.72rem;
-      font-weight: 600;
-      padding: 3px 10px;
-      white-space: nowrap;
+    /* Suggested badge */
+    .suggested-label {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: #ede9fe; color: #6d28d9; border-radius: 4px;
+      font-size: 0.68rem; font-weight: 700; padding: 1px 6px; letter-spacing: .03em;
     }
+    .confidence-bar { height: 3px; border-radius: 2px; background: #e2e8f0; margin-top: 2px; }
+    .confidence-fill { height: 100%; border-radius: 2px; background: #7c3aed; transition: width .3s; }
+
+    .reason-badge { display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; font-size: 0.72rem; font-weight: 600; padding: 3px 10px; white-space: nowrap; }
 
     .empty { text-align: center; padding: 48px; color: var(--muted); }
     #results { display: none; }
     .amount-diff { font-weight: 600; color: var(--fahes); }
-
-    /* Reason legend */
-    .reason-legend {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px 20px;
-      margin-bottom: 20px;
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .reason-legend span { font-size: 0.78rem; font-weight: 700; color: var(--muted); text-transform: uppercase; }
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.8rem;
-      color: var(--text);
-    }
-    .legend-dot {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      display: inline-block;
-    }
+    .tagged-progress { margin-left: auto; font-size: 0.78rem; color: var(--muted); }
   </style>
 </head>
 <body>
@@ -364,7 +190,6 @@
       <p>Click or drag &amp; drop an Excel / CSV file</p>
       <div class="file-name" id="name-aamaly">No file selected</div>
     </div>
-
     <div class="upload-card" id="drop-fahes">
       <input type="file" id="file-fahes" accept=".xlsx,.xls,.csv" />
       <div class="icon">📂</div>
@@ -401,13 +226,15 @@
         <option value="both" selected>Trim + Case-insensitive</option>
       </select>
     </div>
-    <button id="reconcile" disabled>Run Reconciliation</button>
-    <button class="export-btn" id="export-btn" style="display:none">⬇ Export Excel</button>
-    <button id="clear-btn" style="display:none">✕ Clear &amp; Reset</button>
+    <button id="reconcile" disabled>▶ Run Reconciliation</button>
+    <button class="action-btn" id="auto-suggest-btn" style="display:none">⚡ Auto-Suggest Reasons</button>
+    <button class="action-btn" id="export-btn"       style="display:none">⬇ Export Excel</button>
+    <button class="action-btn" id="clear-btn"        style="display:none">✕ Clear &amp; New Comparison</button>
   </div>
 
   <!-- Results -->
   <div id="results">
+
     <div class="summary-grid">
       <div class="summary-card matched">
         <div class="label">Matched</div>
@@ -426,20 +253,33 @@
       </div>
     </div>
 
+    <!-- Auto-suggest result banner -->
+    <div class="suggest-banner" id="suggest-banner" style="display:none">
+      <div class="icon">⚡</div>
+      <div class="text">
+        <strong>Auto-Analysis Complete</strong>
+        <span>The system analyzed all unmatched transactions and suggested reasons based on patterns in the data. You can accept, change, or clear each suggestion.</span>
+      </div>
+      <div class="suggest-stat" id="suggest-stat-refund">🔄 Refunded: 0</div>
+      <div class="suggest-stat" id="suggest-stat-dup">🔁 Duplicate: 0</div>
+      <div class="suggest-stat" id="suggest-stat-pending">⏳ Pending: 0</div>
+      <div class="suggest-stat" id="suggest-stat-timing">⏱ Timing: 0</div>
+      <div class="suggest-stat" id="suggest-stat-error">⚠ Data Error: 0</div>
+      <div class="suggest-stat" id="suggest-stat-other">❓ Other: 0</div>
+    </div>
+
     <!-- Reason legend -->
     <div class="reason-legend">
-      <span>Reason Tags:</span>
-      <div class="legend-item"><span class="legend-dot" style="background:#a855f7"></span> Refunded</div>
-      <div class="legend-item"><span class="legend-dot" style="background:#0891b2"></span> Duplicate</div>
-      <div class="legend-item"><span class="legend-dot" style="background:#f59e0b"></span> Pending</div>
-      <div class="legend-item"><span class="legend-dot" style="background:#6366f1"></span> Timing Difference</div>
-      <div class="legend-item"><span class="legend-dot" style="background:#ef4444"></span> Data Error</div>
-      <div class="legend-item"><span class="legend-dot" style="background:#64748b"></span> Under Review</div>
-      <div class="legend-item"><span class="legend-dot" style="background:#10b981"></span> Resolved</div>
-      <div class="legend-item"><span class="legend-dot" style="background:#374151"></span> Other</div>
-      <div style="margin-left:auto; font-size:0.78rem; color:var(--muted)">
-        Tagged: <strong id="tagged-count">0</strong> / <span id="unmatched-count">0</span> unmatched
-      </div>
+      <span>Reasons:</span>
+      <div class="legend-item"><span class="legend-dot" style="background:#a855f7"></span>Refunded</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#0891b2"></span>Duplicate</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#f59e0b"></span>Pending</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#6366f1"></span>Timing Difference</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#ef4444"></span>Data Error</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#64748b"></span>Under Review</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#10b981"></span>Resolved</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#374151"></span>Other</div>
+      <div class="tagged-progress">Tagged: <strong id="tagged-count">0</strong> / <span id="unmatched-count">0</span> unmatched</div>
     </div>
 
     <div class="tabs">
@@ -452,7 +292,7 @@
 
     <div class="table-toolbar">
       <input class="search-input" id="search" placeholder="🔍  Search transactions…" />
-      <div class="reason-filters" id="reason-filters">
+      <div class="reason-filters">
         <span>Filter:</span>
         <button class="reason-chip active" data-reason="">All</button>
         <button class="reason-chip" data-reason="Refunded">Refunded</button>
@@ -490,6 +330,12 @@ const REASON_COLORS = {
   'Resolved':          '#10b981',
   'Other':             '#374151',
 };
+
+// Keywords for suggestion engine
+const REFUND_KEYWORDS    = ['refund','reversal','reverse','رد','استرداد','مرتجع','cancelled','cancel','void','إلغاء','credit note'];
+const PENDING_KEYWORDS   = ['pending','hold','قيد','انتظار','processing','في الانتظار'];
+const DUPLICATE_KEYWORDS = ['duplicate','dup','مكرر','تكرار'];
+const ERROR_KEYWORDS     = ['error','خطأ','wrong','incorrect','مغلوط','failed','فشل'];
 
 // ─── State ────────────────────────────────────────────────────────────────────
 let dataAamaly = [], dataFahes = [];
@@ -594,6 +440,10 @@ document.getElementById('reconcile').addEventListener('click', () => {
     fahesMap.get(key).push(row);
   });
 
+  // Count duplicates within each source
+  const aamalyKeyCounts = countKeys(dataAamaly, colA, mode);
+  const fahesKeyCounts  = countKeys(dataFahes,  colF, mode);
+
   allRows = [];
 
   dataAamaly.forEach(rowA => {
@@ -604,40 +454,152 @@ document.getElementById('reconcile').addEventListener('click', () => {
       allRows.push({
         status: amtMatch ? 'matched' : 'matched-diff',
         key: rowA[colA], aamalyRow: rowA, fahesRow: rowF,
-        reason: '', note: ''
+        reason: '', note: '', suggested: '', confidence: 0, isDup: aamalyKeyCounts[key] > 1
       });
     } else {
-      allRows.push({ status: 'only-aamaly', key: rowA[colA], aamalyRow: rowA, fahesRow: null, reason: '', note: '' });
+      allRows.push({
+        status: 'only-aamaly', key: rowA[colA], aamalyRow: rowA, fahesRow: null,
+        reason: '', note: '', suggested: '', confidence: 0, isDup: aamalyKeyCounts[key] > 1
+      });
     }
   });
 
-  fahesMap.forEach(remaining => {
+  fahesMap.forEach((remaining, key) => {
     remaining.forEach(rowF => {
-      allRows.push({ status: 'only-fahes', key: rowF[colF], aamalyRow: null, fahesRow: rowF, reason: '', note: '' });
+      allRows.push({
+        status: 'only-fahes', key: rowF[colF], aamalyRow: null, fahesRow: rowF,
+        reason: '', note: '', suggested: '', confidence: 0, isDup: fahesKeyCounts[key] > 1
+      });
     });
   });
 
-  window._reconcileState = { colA, colF, amtA, amtF };
+  window._reconcileState = { colA, colF, amtA, amtF, mode };
+  document.getElementById('suggest-banner').style.display = 'none';
   renderResults();
 });
 
+function countKeys(data, col, mode) {
+  const counts = {};
+  data.forEach(row => {
+    const k = normalize(row[col], mode);
+    counts[k] = (counts[k] || 0) + 1;
+  });
+  return counts;
+}
+
 function parseNum(v) {
-  const n = parseFloat(String(v ?? '').replace(/[,٬]/g, ''));
+  const n = parseFloat(String(v ?? '').replace(/[,٬،]/g, ''));
   return isNaN(n) ? null : n;
 }
 
+// ─── AUTO-SUGGEST ENGINE ──────────────────────────────────────────────────────
+function suggestReason(r) {
+  const { amtA, amtF } = window._reconcileState || {};
+  const row = r.aamalyRow || r.fahesRow;
+  const allText = Object.values(row).join(' ').toLowerCase();
+
+  // 1. Duplicate key in same source
+  if (r.isDup) return { reason: 'Duplicate', confidence: 90, note: 'Key appears more than once in the same file' };
+
+  // 2. Empty or invalid key
+  const key = String(r.key ?? '').trim();
+  if (!key || key === '0' || /^[-_\s.]+$/.test(key))
+    return { reason: 'Data Error', confidence: 85, note: 'Transaction key is empty or invalid' };
+
+  // 3. Refund keywords in any field
+  if (REFUND_KEYWORDS.some(kw => allText.includes(kw)))
+    return { reason: 'Refunded', confidence: 88, note: 'Refund/reversal keyword found in transaction data' };
+
+  // 4. Negative amount
+  const amt = amtA ? parseNum(row[amtA]) : (amtF ? parseNum(row[amtF]) : null);
+  if (amt !== null && amt < 0)
+    return { reason: 'Refunded', confidence: 80, note: 'Negative amount suggests a refund or reversal' };
+
+  // 5. Zero amount
+  if (amt !== null && amt === 0)
+    return { reason: 'Data Error', confidence: 70, note: 'Zero amount — may be a placeholder or error' };
+
+  // 6. Error keywords
+  if (ERROR_KEYWORDS.some(kw => allText.includes(kw)))
+    return { reason: 'Data Error', confidence: 75, note: 'Error keyword found in transaction data' };
+
+  // 7. Pending keywords
+  if (PENDING_KEYWORDS.some(kw => allText.includes(kw)))
+    return { reason: 'Pending', confidence: 82, note: 'Pending/hold keyword found in transaction data' };
+
+  // 8. Duplicate keywords in text
+  if (DUPLICATE_KEYWORDS.some(kw => allText.includes(kw)))
+    return { reason: 'Duplicate', confidence: 78, note: 'Duplicate keyword found in transaction data' };
+
+  // 9. Near-match key exists in opposite file (timing/format issue)
+  const { colA, colF, mode } = window._reconcileState || {};
+  const oppositeData = r.status === 'only-aamaly' ? dataFahes  : dataAamaly;
+  const oppositeCol  = r.status === 'only-aamaly' ? colF       : colA;
+  const normKey = normalize(r.key, 'both');
+  const nearMatch = oppositeData.some(oRow => {
+    const oKey = normalize(oRow[oppositeCol], 'both');
+    return oKey !== normKey && (oKey.includes(normKey) || normKey.includes(oKey) || levenshtein(normKey, oKey) <= 2);
+  });
+  if (nearMatch)
+    return { reason: 'Timing Difference', confidence: 65, note: 'A similar key exists in the other file — possible timing or format mismatch' };
+
+  // 10. Recent date in any field
+  const dateMatch = allText.match(/\b(202[4-9]|2030)\b/);
+  if (dateMatch)
+    return { reason: 'Pending', confidence: 55, note: 'Recent date found — transaction may still be processing' };
+
+  return { reason: 'Under Review', confidence: 40, note: 'Could not determine reason automatically — needs manual review' };
+}
+
+function levenshtein(a, b) {
+  if (a.length > 30 || b.length > 30) return 99;
+  const dp = Array.from({length: a.length+1}, (_, i) => [i, ...Array(b.length).fill(0)]);
+  for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+  for (let i = 1; i <= a.length; i++)
+    for (let j = 1; j <= b.length; j++)
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+  return dp[a.length][b.length];
+}
+
+document.getElementById('auto-suggest-btn').addEventListener('click', () => {
+  const unmatched = allRows.filter(r => r.status === 'only-aamaly' || r.status === 'only-fahes');
+  const counts = { Refunded:0, Duplicate:0, Pending:0, 'Timing Difference':0, 'Data Error':0, other:0 };
+
+  unmatched.forEach(r => {
+    if (r.reason) return; // don't overwrite manually set reasons
+    const { reason, confidence, note } = suggestReason(r);
+    r.suggested   = reason;
+    r.confidence  = confidence;
+    r.reason      = reason;
+    r.note        = r.note || note;
+    if (counts[reason] !== undefined) counts[reason]++;
+    else counts.other++;
+  });
+
+  // Update banner stats
+  document.getElementById('suggest-stat-refund').textContent  = `🔄 Refunded: ${counts['Refunded']}`;
+  document.getElementById('suggest-stat-dup').textContent     = `🔁 Duplicate: ${counts['Duplicate']}`;
+  document.getElementById('suggest-stat-pending').textContent = `⏳ Pending: ${counts['Pending']}`;
+  document.getElementById('suggest-stat-timing').textContent  = `⏱ Timing: ${counts['Timing Difference']}`;
+  document.getElementById('suggest-stat-error').textContent   = `⚠ Data Error: ${counts['Data Error']}`;
+  document.getElementById('suggest-stat-other').textContent   = `❓ Other: ${counts.other}`;
+  document.getElementById('suggest-banner').style.display     = '';
+
+  renderResults();
+});
+
 // ─── Render Results ───────────────────────────────────────────────────────────
 function renderResults() {
-  const matched  = allRows.filter(r => r.status === 'matched' || r.status === 'matched-diff');
-  const onlyA    = allRows.filter(r => r.status === 'only-aamaly');
-  const onlyF    = allRows.filter(r => r.status === 'only-fahes');
+  const matched   = allRows.filter(r => r.status === 'matched' || r.status === 'matched-diff');
+  const onlyA     = allRows.filter(r => r.status === 'only-aamaly');
+  const onlyF     = allRows.filter(r => r.status === 'only-fahes');
   const unmatched = [...onlyA, ...onlyF];
-  const tagged   = unmatched.filter(r => r.reason);
-  const untagged = unmatched.filter(r => !r.reason);
+  const tagged    = unmatched.filter(r => r.reason);
+  const untagged  = unmatched.filter(r => !r.reason);
 
-  document.getElementById('cnt-matched').textContent  = matched.length;
-  document.getElementById('cnt-aamaly').textContent   = onlyA.length;
-  document.getElementById('cnt-fahes').textContent    = onlyF.length;
+  document.getElementById('cnt-matched').textContent   = matched.length;
+  document.getElementById('cnt-aamaly').textContent    = onlyA.length;
+  document.getElementById('cnt-fahes').textContent     = onlyF.length;
   document.getElementById('pill-matched').textContent  = matched.length;
   document.getElementById('pill-aamaly').textContent   = onlyA.length;
   document.getElementById('pill-fahes').textContent    = onlyF.length;
@@ -646,9 +608,10 @@ function renderResults() {
   document.getElementById('tagged-count').textContent  = tagged.length;
   document.getElementById('unmatched-count').textContent = unmatched.length;
 
-  document.getElementById('results').style.display = 'block';
-  document.getElementById('export-btn').style.display = '';
-  document.getElementById('clear-btn').style.display = '';
+  document.getElementById('results').style.display        = 'block';
+  document.getElementById('auto-suggest-btn').style.display = '';
+  document.getElementById('export-btn').style.display     = '';
+  document.getElementById('clear-btn').style.display      = '';
 
   renderTable();
 }
@@ -657,12 +620,10 @@ function renderResults() {
 function getVisible() {
   const q = document.getElementById('search').value.toLowerCase().trim();
   let rows = allRows;
-
-  if (activeTab === 'matched')      rows = rows.filter(r => r.status === 'matched' || r.status === 'matched-diff');
+  if (activeTab === 'matched')       rows = rows.filter(r => r.status === 'matched' || r.status === 'matched-diff');
   else if (activeTab === 'only-aamaly') rows = rows.filter(r => r.status === 'only-aamaly');
   else if (activeTab === 'only-fahes')  rows = rows.filter(r => r.status === 'only-fahes');
   else if (activeTab === 'untagged')    rows = rows.filter(r => (r.status === 'only-aamaly' || r.status === 'only-fahes') && !r.reason);
-
   if (activeReasonFilter) rows = rows.filter(r => r.reason === activeReasonFilter);
   if (q) rows = rows.filter(r => JSON.stringify(r).toLowerCase().includes(q));
   return rows;
@@ -672,7 +633,6 @@ function getVisible() {
 function renderTable() {
   const { colA, colF, amtA, amtF } = window._reconcileState || {};
   const visible = getVisible();
-  const isUnmatchedTab = (activeTab !== 'matched');
 
   const aHeaders = headAamaly.filter(h => h !== colA).slice(0, 5);
   const fHeaders = headFahes.filter(h => h !== colF).filter(h => !aHeaders.includes(h)).slice(0, 3);
@@ -680,16 +640,14 @@ function renderTable() {
   const thead = document.getElementById('tbl-head');
   thead.innerHTML = '';
   const tr = document.createElement('tr');
-
   const cols = ['Status', 'Match Key'];
   if (amtA) cols.push('Aamaly Amt');
   if (amtF) cols.push('Fahes Amt');
   if (amtA && amtF) cols.push('Diff');
   aHeaders.forEach(c => cols.push('A: ' + c));
   fHeaders.forEach(c => cols.push('F: ' + c));
-  cols.push('Reason');
+  cols.push('Reason / Suggestion');
   cols.push('Notes');
-
   cols.forEach(c => { const th = document.createElement('th'); th.textContent = c; tr.appendChild(th); });
   thead.appendChild(tr);
 
@@ -702,13 +660,13 @@ function renderTable() {
     tbody.appendChild(row); return;
   }
 
-  visible.forEach((r, visIdx) => {
+  visible.forEach(r => {
     const globalIdx = allRows.indexOf(r);
     const isUnmatched = r.status === 'only-aamaly' || r.status === 'only-fahes';
     const tr = document.createElement('tr');
     const cells = [];
 
-    // Status tag
+    // Status
     let statusTag = '';
     if      (r.status === 'matched')      statusTag = '<span class="tag tag-matched">✓ Matched</span>';
     else if (r.status === 'matched-diff') statusTag = '<span class="tag tag-aamaly">⚠ Amt Diff</span>';
@@ -735,13 +693,25 @@ function renderTable() {
     // Reason cell
     if (isUnmatched) {
       const color = REASON_COLORS[r.reason] || '';
+      const isSuggested = r.suggested && r.reason === r.suggested;
       const reasonOpts = REASONS.map(rv =>
         `<option value="${rv}" ${rv === r.reason ? 'selected' : ''}>${rv || '— select reason —'}</option>`
       ).join('');
+
+      const suggestedBadge = isSuggested
+        ? `<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+             <span class="suggested-label">⚡ Suggested (${r.confidence}%)</span>
+             <div class="confidence-bar" style="flex:1">
+               <div class="confidence-fill" style="width:${r.confidence}%"></div>
+             </div>
+           </div>`
+        : '';
+
       cells.push(
         `<div class="reason-cell">
+          ${suggestedBadge}
           <select class="reason-select ${r.reason ? 'has-reason' : ''}"
-                  style="${r.reason ? `border-color:${color};background:${color}11;color:${color}` : ''}"
+                  style="${r.reason ? `border-color:${color};background:${color}18;color:${color}` : ''}"
                   data-idx="${globalIdx}" onchange="setReason(this)">
             ${reasonOpts}
           </select>
@@ -752,11 +722,9 @@ function renderTable() {
                placeholder="Add note…"
                value="${escHtml(r.note || '')}"
                data-idx="${globalIdx}"
-               onchange="setNote(this)"
                oninput="setNote(this)" />`
       );
     } else {
-      // Matched rows — show reason badge if any, otherwise dash
       cells.push(r.reason
         ? `<span class="reason-badge" style="background:${REASON_COLORS[r.reason]}22;color:${REASON_COLORS[r.reason]}">${escHtml(r.reason)}</span>`
         : '—');
@@ -772,11 +740,12 @@ function renderTable() {
 function setReason(sel) {
   const idx = parseInt(sel.dataset.idx);
   allRows[idx].reason = sel.value;
+  allRows[idx].suggested = ''; // mark as manually changed
   const color = REASON_COLORS[sel.value] || '';
   if (sel.value) {
     sel.classList.add('has-reason');
     sel.style.borderColor = color;
-    sel.style.background  = color + '22';
+    sel.style.background  = color + '18';
     sel.style.color       = color;
   } else {
     sel.classList.remove('has-reason');
@@ -794,10 +763,8 @@ function setNote(input) {
 
 function updateTaggedCount() {
   const unmatched = allRows.filter(r => r.status === 'only-aamaly' || r.status === 'only-fahes');
-  const tagged    = unmatched.filter(r => r.reason);
-  const untagged  = unmatched.filter(r => !r.reason);
-  document.getElementById('tagged-count').textContent   = tagged.length;
-  document.getElementById('pill-untagged').textContent  = untagged.length;
+  document.getElementById('tagged-count').textContent   = unmatched.filter(r => r.reason).length;
+  document.getElementById('pill-untagged').textContent  = unmatched.filter(r => !r.reason).length;
 }
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
@@ -823,6 +790,44 @@ document.querySelectorAll('.reason-chip').forEach(chip => {
 // ─── Search ───────────────────────────────────────────────────────────────────
 document.getElementById('search').addEventListener('input', renderTable);
 
+// ─── Clear & Reset ────────────────────────────────────────────────────────────
+document.getElementById('clear-btn').addEventListener('click', () => {
+  if (!confirm('Clear all results and files to start a new comparison?')) return;
+
+  dataAamaly = []; dataFahes = [];
+  headAamaly = []; headFahes = [];
+  allRows = [];
+  activeTab = 'matched';
+  activeReasonFilter = '';
+  window._reconcileState = null;
+
+  ['aamaly','fahes'].forEach(side => {
+    document.getElementById(`file-${side}`).value = '';
+    document.getElementById(`name-${side}`).textContent = 'No file selected';
+    document.getElementById(`drop-${side}`).classList.remove('drag-over');
+  });
+
+  ['col-aamaly','col-fahes'].forEach(id => {
+    document.getElementById(id).innerHTML = `<option value="">— load file first —</option>`;
+  });
+  ['amt-aamaly','amt-fahes'].forEach(id => {
+    document.getElementById(id).innerHTML = `<option value="">(none)</option>`;
+  });
+
+  document.getElementById('search').value = '';
+  document.querySelectorAll('.reason-chip').forEach(c => c.classList.remove('active'));
+  document.querySelector('.reason-chip[data-reason=""]').classList.add('active');
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.querySelector('.tab[data-tab="matched"]').classList.add('active');
+
+  document.getElementById('results').style.display          = 'none';
+  document.getElementById('suggest-banner').style.display   = 'none';
+  document.getElementById('auto-suggest-btn').style.display = 'none';
+  document.getElementById('export-btn').style.display       = 'none';
+  document.getElementById('clear-btn').style.display        = 'none';
+  document.getElementById('reconcile').disabled             = true;
+});
+
 // ─── Export ───────────────────────────────────────────────────────────────────
 document.getElementById('export-btn').addEventListener('click', () => {
   const { colA, colF, amtA, amtF } = window._reconcileState || {};
@@ -831,7 +836,14 @@ document.getElementById('export-btn').addEventListener('click', () => {
   const toSheet = rows => {
     if (!rows.length) return XLSX.utils.aoa_to_sheet([['No data']]);
     return XLSX.utils.json_to_sheet(rows.map(r => {
-      const obj = { Status: r.status, MatchKey: r.key, Reason: r.reason || '', Notes: r.note || '' };
+      const obj = {
+        Status: r.status,
+        MatchKey: r.key,
+        Reason: r.reason || '',
+        Suggested: r.suggested || '',
+        Confidence: r.suggested ? r.confidence + '%' : '',
+        Notes: r.note || ''
+      };
       if (r.aamalyRow) headAamaly.forEach(h => obj['A_' + h] = r.aamalyRow[h]);
       if (r.fahesRow)  headFahes.forEach(h  => obj['F_' + h]  = r.fahesRow[h]);
       if (amtA && amtF) obj['Amount_Diff'] = (parseNum(r.aamalyRow?.[amtA]) ?? 0) - (parseNum(r.fahesRow?.[amtF]) ?? 0);
@@ -843,53 +855,13 @@ document.getElementById('export-btn').addEventListener('click', () => {
   XLSX.utils.book_append_sheet(wb, toSheet(allRows.filter(r => r.status==='only-aamaly')), 'Only_Aamaly');
   XLSX.utils.book_append_sheet(wb, toSheet(allRows.filter(r => r.status==='only-fahes')),  'Only_Fahes');
 
-  // Breakdown by reason
   const reasons = [...new Set(allRows.map(r => r.reason).filter(Boolean))];
   reasons.forEach(rsn => {
-    const name = rsn.replace(/[^a-zA-Z0-9]/g,'_').slice(0,28);
-    XLSX.utils.book_append_sheet(wb, toSheet(allRows.filter(r => r.reason===rsn)), name);
+    XLSX.utils.book_append_sheet(wb, toSheet(allRows.filter(r => r.reason===rsn)), rsn.replace(/[^a-zA-Z0-9]/g,'_').slice(0,28));
   });
 
   XLSX.utils.book_append_sheet(wb, toSheet(allRows), 'All');
   XLSX.writeFile(wb, `reconciliation_${new Date().toISOString().slice(0,10)}.xlsx`);
-});
-
-// ─── Clear & Reset ────────────────────────────────────────────────────────────
-document.getElementById('clear-btn').addEventListener('click', () => {
-  // Reset data
-  dataAamaly = []; dataFahes = [];
-  headAamaly = []; headFahes = [];
-  allRows = [];
-  activeTab = 'matched';
-  activeReasonFilter = '';
-  window._reconcileState = null;
-
-  // Reset file inputs & labels
-  ['aamaly','fahes'].forEach(side => {
-    document.getElementById(`file-${side}`).value = '';
-    document.getElementById(`name-${side}`).textContent = 'No file selected';
-  });
-
-  // Reset column selects
-  ['col-aamaly','col-fahes','amt-aamaly','amt-fahes'].forEach(id => {
-    const sel = document.getElementById(id);
-    sel.innerHTML = `<option value="">— load file first —</option>`;
-  });
-
-  // Reset search & reason filter chips
-  document.getElementById('search').value = '';
-  document.querySelectorAll('.reason-chip').forEach(c => c.classList.remove('active'));
-  document.querySelector('.reason-chip[data-reason=""]').classList.add('active');
-
-  // Reset tabs
-  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-  document.querySelector('.tab[data-tab="matched"]').classList.add('active');
-
-  // Hide results & buttons
-  document.getElementById('results').style.display = 'none';
-  document.getElementById('export-btn').style.display = 'none';
-  document.getElementById('clear-btn').style.display = 'none';
-  document.getElementById('reconcile').disabled = true;
 });
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
