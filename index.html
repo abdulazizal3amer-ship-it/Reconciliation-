@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reconciliation Tool – Aamaly vs Fahes</title>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f4f6f9;
+      --card: #ffffff;
+      --border: #dde2ea;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --matched: #16a34a;
+      --matched-bg: #f0fdf4;
+      --aamaly: #d97706;
+      --aamaly-bg: #fffbeb;
+      --fahes: #dc2626;
+      --fahes-bg: #fef2f2;
+      --text: #1e293b;
+      --muted: #64748b;
+      --radius: 10px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    header h1 { font-size: 1.25rem; font-weight: 700; }
+    header span { font-size: 0.85rem; opacity: 0.8; }
+
+    main { max-width: 1200px; margin: 0 auto; padding: 32px 16px; }
+
+    /* Upload area */
+    .upload-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 640px) { .upload-grid { grid-template-columns: 1fr; } }
+
+    .upload-card {
+      background: var(--card);
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 28px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      position: relative;
+    }
+    .upload-card:hover, .upload-card.drag-over {
+      border-color: var(--primary);
+      background: #eff6ff;
+    }
+    .upload-card input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer;
+    }
+    .upload-card .icon { font-size: 2.5rem; margin-bottom: 10px; }
+    .upload-card h2 { font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
+    .upload-card p { font-size: 0.8rem; color: var(--muted); }
+    .upload-card .file-name {
+      margin-top: 10px;
+      font-size: 0.82rem;
+      color: var(--primary);
+      font-weight: 500;
+      word-break: break-all;
+    }
+    .badge-aamaly { color: var(--aamaly); }
+    .badge-fahes  { color: var(--fahes); }
+
+    /* Config row */
+    .config-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-end;
+      margin-bottom: 24px;
+    }
+    .config-group { display: flex; flex-direction: column; gap: 4px; min-width: 180px; }
+    .config-group label { font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+    .config-group select, .config-group input {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 0.9rem;
+      background: var(--card);
+      color: var(--text);
+      outline: none;
+    }
+    .config-group select:focus, .config-group input:focus { border-color: var(--primary); }
+
+    button#reconcile {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 28px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+      align-self: flex-end;
+    }
+    button#reconcile:hover { background: var(--primary-hover); }
+    button#reconcile:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    button.export-btn {
+      background: #fff;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+      align-self: flex-end;
+    }
+    button.export-btn:hover { background: #eff6ff; }
+
+    /* Summary cards */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 640px) { .summary-grid { grid-template-columns: 1fr; } }
+
+    .summary-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      border-left: 4px solid transparent;
+    }
+    .summary-card.matched { border-color: var(--matched); background: var(--matched-bg); }
+    .summary-card.only-aamaly { border-color: var(--aamaly); background: var(--aamaly-bg); }
+    .summary-card.only-fahes { border-color: var(--fahes); background: var(--fahes-bg); }
+    .summary-card .label { font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; }
+    .summary-card .count { font-size: 2rem; font-weight: 700; margin: 4px 0; }
+    .summary-card.matched .count { color: var(--matched); }
+    .summary-card.only-aamaly .count { color: var(--aamaly); }
+    .summary-card.only-fahes .count { color: var(--fahes); }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 2px solid var(--border); }
+    .tab {
+      padding: 10px 20px;
+      border: none;
+      background: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--muted);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: color .15s, border-color .15s;
+    }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+    .tab .pill {
+      display: inline-block;
+      background: var(--border);
+      border-radius: 999px;
+      font-size: 0.72rem;
+      padding: 1px 7px;
+      margin-left: 6px;
+    }
+    .tab.active .pill { background: var(--primary); color: #fff; }
+
+    /* Search */
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .search-input {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 12px;
+      font-size: 0.88rem;
+      width: 260px;
+      outline: none;
+    }
+    .search-input:focus { border-color: var(--primary); }
+
+    /* Table */
+    .table-wrap {
+      overflow-x: auto;
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    thead th {
+      background: #f8fafc;
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody tr { border-bottom: 1px solid #f1f5f9; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #f8fafc; }
+    td { padding: 9px 14px; }
+
+    .tag {
+      display: inline-block;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 10px;
+    }
+    .tag-matched { background: #dcfce7; color: var(--matched); }
+    .tag-aamaly { background: #fef3c7; color: var(--aamaly); }
+    .tag-fahes { background: #fee2e2; color: var(--fahes); }
+
+    .diff-cell { display: flex; flex-direction: column; gap: 1px; }
+    .diff-a { color: var(--aamaly); font-size: 0.78rem; }
+    .diff-f { color: var(--fahes); font-size: 0.78rem; }
+
+    .empty { text-align: center; padding: 48px; color: var(--muted); }
+
+    #results { display: none; }
+
+    .amount-diff { font-weight: 600; color: var(--fahes); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Reconciliation Tool</h1>
+    <span>Aamaly vs Fahes – Transaction Matching</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- Upload -->
+  <div class="upload-grid">
+    <div class="upload-card" id="drop-aamaly">
+      <input type="file" id="file-aamaly" accept=".xlsx,.xls,.csv" />
+      <div class="icon">📂</div>
+      <h2 class="badge-aamaly">Aamaly File</h2>
+      <p>Click or drag &amp; drop an Excel / CSV file</p>
+      <div class="file-name" id="name-aamaly">No file selected</div>
+    </div>
+
+    <div class="upload-card" id="drop-fahes">
+      <input type="file" id="file-fahes" accept=".xlsx,.xls,.csv" />
+      <div class="icon">📂</div>
+      <h2 class="badge-fahes">Fahes File</h2>
+      <p>Click or drag &amp; drop an Excel / CSV file</p>
+      <div class="file-name" id="name-fahes">No file selected</div>
+    </div>
+  </div>
+
+  <!-- Config -->
+  <div class="config-row">
+    <div class="config-group">
+      <label>Aamaly – Match Column</label>
+      <select id="col-aamaly"><option value="">— load file first —</option></select>
+    </div>
+    <div class="config-group">
+      <label>Fahes – Match Column</label>
+      <select id="col-fahes"><option value="">— load file first —</option></select>
+    </div>
+    <div class="config-group">
+      <label>Amount Column (Aamaly)</label>
+      <select id="amt-aamaly"><option value="">(none)</option></select>
+    </div>
+    <div class="config-group">
+      <label>Amount Column (Fahes)</label>
+      <select id="amt-fahes"><option value="">(none)</option></select>
+    </div>
+    <div class="config-group">
+      <label>Match tolerance</label>
+      <select id="match-mode">
+        <option value="exact">Exact</option>
+        <option value="trim">Trim whitespace</option>
+        <option value="case">Case-insensitive</option>
+        <option value="both" selected>Trim + Case-insensitive</option>
+      </select>
+    </div>
+    <button id="reconcile" disabled>Run Reconciliation</button>
+    <button class="export-btn" id="export-btn" style="display:none">⬇ Export Excel</button>
+  </div>
+
+  <!-- Results -->
+  <div id="results">
+    <div class="summary-grid">
+      <div class="summary-card matched">
+        <div class="label">Matched</div>
+        <div class="count" id="cnt-matched">0</div>
+        <div style="font-size:.8rem;color:var(--muted)">transactions reconciled</div>
+      </div>
+      <div class="summary-card only-aamaly">
+        <div class="label">Only in Aamaly</div>
+        <div class="count" id="cnt-aamaly">0</div>
+        <div style="font-size:.8rem;color:var(--muted)">not found in Fahes</div>
+      </div>
+      <div class="summary-card only-fahes">
+        <div class="label">Only in Fahes</div>
+        <div class="count" id="cnt-fahes">0</div>
+        <div style="font-size:.8rem;color:var(--muted)">not found in Aamaly</div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="matched">Matched <span class="pill" id="pill-matched">0</span></button>
+      <button class="tab" data-tab="only-aamaly">Only Aamaly <span class="pill" id="pill-aamaly">0</span></button>
+      <button class="tab" data-tab="only-fahes">Only Fahes <span class="pill" id="pill-fahes">0</span></button>
+      <button class="tab" data-tab="all">All <span class="pill" id="pill-all">0</span></button>
+    </div>
+
+    <div class="table-toolbar">
+      <input class="search-input" id="search" placeholder="🔍  Search transactions…" />
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead id="tbl-head"></thead>
+        <tbody id="tbl-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ─── State ───────────────────────────────────────────────────────────────────
+let dataAamaly = [], dataFahes = [];
+let headAamaly = [], headFahes = [];
+let allRows = [];      // [{status, aamalyRow, fahesRow, key}]
+let activeTab = 'matched';
+
+// ─── File Loading ─────────────────────────────────────────────────────────────
+function readFile(file, cb) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    const wb = XLSX.read(e.target.result, { type: 'array', cellDates: true, raw: false });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+    const headers = rows.length ? Object.keys(rows[0]) : [];
+    cb(headers, rows);
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function populateSelect(sel, headers, placeholder) {
+  sel.innerHTML = `<option value="">${placeholder}</option>`;
+  headers.forEach(h => {
+    const o = document.createElement('option');
+    o.value = h; o.textContent = h;
+    sel.appendChild(o);
+  });
+}
+
+function autoDetect(headers, keywords) {
+  const lk = keywords.map(k => k.toLowerCase());
+  return headers.find(h => lk.some(k => h.toLowerCase().includes(k))) || '';
+}
+
+document.getElementById('file-aamaly').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  document.getElementById('name-aamaly').textContent = f.name;
+  readFile(f, (headers, rows) => {
+    headAamaly = headers; dataAamaly = rows;
+    populateSelect(document.getElementById('col-aamaly'), headers, '— select column —');
+    populateSelect(document.getElementById('amt-aamaly'), headers, '(none)');
+    document.getElementById('col-aamaly').value = autoDetect(headers, ['ref','id','txn','transaction','رقم']);
+    document.getElementById('amt-aamaly').value = autoDetect(headers, ['amount','مبلغ','value','total']);
+    checkReady();
+  });
+});
+
+document.getElementById('file-fahes').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  document.getElementById('name-fahes').textContent = f.name;
+  readFile(f, (headers, rows) => {
+    headFahes = headers; dataFahes = rows;
+    populateSelect(document.getElementById('col-fahes'), headers, '— select column —');
+    populateSelect(document.getElementById('amt-fahes'), headers, '(none)');
+    document.getElementById('col-fahes').value = autoDetect(headers, ['ref','id','txn','transaction','رقم']);
+    document.getElementById('amt-fahes').value = autoDetect(headers, ['amount','مبلغ','value','total']);
+    checkReady();
+  });
+});
+
+// Drag & drop
+['aamaly','fahes'].forEach(side => {
+  const drop = document.getElementById(`drop-${side}`);
+  drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag-over'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('drag-over'));
+  drop.addEventListener('drop', e => {
+    e.preventDefault(); drop.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) document.getElementById(`file-${side}`).files = e.dataTransfer.files,
+              document.getElementById(`file-${side}`).dispatchEvent(new Event('change'));
+  });
+});
+
+function checkReady() {
+  const ok = dataAamaly.length && dataFahes.length;
+  document.getElementById('reconcile').disabled = !ok;
+}
+
+// ─── Normalization ────────────────────────────────────────────────────────────
+function normalize(val, mode) {
+  let s = String(val ?? '');
+  if (mode === 'trim' || mode === 'both') s = s.trim();
+  if (mode === 'case' || mode === 'both') s = s.toLowerCase();
+  return s;
+}
+
+// ─── Reconcile ────────────────────────────────────────────────────────────────
+document.getElementById('reconcile').addEventListener('click', () => {
+  const colA = document.getElementById('col-aamaly').value;
+  const colF = document.getElementById('col-fahes').value;
+  const amtA = document.getElementById('amt-aamaly').value;
+  const amtF = document.getElementById('amt-fahes').value;
+  const mode = document.getElementById('match-mode').value;
+
+  if (!colA || !colF) { alert('Please select a match column for both files.'); return; }
+
+  const fahesMap = new Map();
+  dataFahes.forEach(row => {
+    const key = normalize(row[colF], mode);
+    if (!fahesMap.has(key)) fahesMap.set(key, []);
+    fahesMap.get(key).push(row);
+  });
+
+  const usedFahesKeys = new Set();
+  allRows = [];
+
+  dataAamaly.forEach(rowA => {
+    const key = normalize(rowA[colA], mode);
+    if (fahesMap.has(key) && fahesMap.get(key).length) {
+      const rowF = fahesMap.get(key).shift();
+      usedFahesKeys.add(key);
+      const amtMatch = amtA && amtF
+        ? parseNum(rowA[amtA]) === parseNum(rowF[amtF])
+        : true;
+      allRows.push({ status: amtMatch ? 'matched' : 'matched-diff', key: rowA[colA], aamalyRow: rowA, fahesRow: rowF,
+                     amtA: amtA ? rowA[amtA] : null, amtF: amtF ? rowF[amtF] : null });
+    } else {
+      allRows.push({ status: 'only-aamaly', key: rowA[colA], aamalyRow: rowA, fahesRow: null });
+    }
+  });
+
+  dataFahes.forEach(rowF => {
+    const key = normalize(rowF[colF], mode);
+    if (!usedFahesKeys.has(key) || fahesMap.get(key)?.length > 0) {
+      // check if any remaining in map
+    }
+  });
+
+  // Collect unmatched fahes
+  fahesMap.forEach((remaining) => {
+    remaining.forEach(rowF => {
+      allRows.push({ status: 'only-fahes', key: rowF[colF], aamalyRow: null, fahesRow: rowF });
+    });
+  });
+
+  renderResults(colA, colF, amtA, amtF);
+});
+
+function parseNum(v) {
+  const n = parseFloat(String(v ?? '').replace(/[,٬]/g, ''));
+  return isNaN(n) ? null : n;
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+function renderResults(colA, colF, amtA, amtF) {
+  const matched = allRows.filter(r => r.status === 'matched' || r.status === 'matched-diff');
+  const onlyA   = allRows.filter(r => r.status === 'only-aamaly');
+  const onlyF   = allRows.filter(r => r.status === 'only-fahes');
+
+  document.getElementById('cnt-matched').textContent = matched.length;
+  document.getElementById('cnt-aamaly').textContent  = onlyA.length;
+  document.getElementById('cnt-fahes').textContent   = onlyF.length;
+  document.getElementById('pill-matched').textContent = matched.length;
+  document.getElementById('pill-aamaly').textContent  = onlyA.length;
+  document.getElementById('pill-fahes').textContent   = onlyF.length;
+  document.getElementById('pill-all').textContent     = allRows.length;
+
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('export-btn').style.display = '';
+
+  window._reconcileState = { colA, colF, amtA, amtF };
+  renderTable();
+}
+
+function getVisible() {
+  const q = document.getElementById('search').value.toLowerCase().trim();
+  let rows = allRows;
+
+  if (activeTab === 'matched')      rows = rows.filter(r => r.status === 'matched' || r.status === 'matched-diff');
+  else if (activeTab === 'only-aamaly') rows = rows.filter(r => r.status === 'only-aamaly');
+  else if (activeTab === 'only-fahes')  rows = rows.filter(r => r.status === 'only-fahes');
+
+  if (q) rows = rows.filter(r => JSON.stringify(r).toLowerCase().includes(q));
+  return rows;
+}
+
+function renderTable() {
+  const { colA, colF, amtA, amtF } = window._reconcileState || {};
+  const visible = getVisible();
+
+  // Build header columns
+  const aHeaders = headAamaly.filter(h => h !== colA);
+  const fHeaders = headFahes.filter(h => h !== colF);
+  const sharedCols = [...new Set([...aHeaders.slice(0, 6)])];
+  const fOnlyCols  = fHeaders.filter(h => !sharedCols.includes(h)).slice(0, 4);
+
+  const thead = document.getElementById('tbl-head');
+  thead.innerHTML = '';
+  const tr = document.createElement('tr');
+
+  const cols = ['Status', 'Match Key'];
+  if (amtA) cols.push('Aamaly Amount');
+  if (amtF) cols.push('Fahes Amount');
+  if (amtA && amtF) cols.push('Diff');
+  sharedCols.forEach(c => cols.push('A: ' + c));
+  fOnlyCols.forEach(c => cols.push('F: ' + c));
+
+  cols.forEach(c => { const th = document.createElement('th'); th.textContent = c; tr.appendChild(th); });
+  thead.appendChild(tr);
+
+  const tbody = document.getElementById('tbl-body');
+  tbody.innerHTML = '';
+
+  if (!visible.length) {
+    const row = document.createElement('tr');
+    row.innerHTML = `<td class="empty" colspan="${cols.length}">No transactions to display.</td>`;
+    tbody.appendChild(row); return;
+  }
+
+  visible.forEach(r => {
+    const tr = document.createElement('tr');
+    const cells = [];
+
+    // Status
+    let tag = '';
+    if (r.status === 'matched') tag = '<span class="tag tag-matched">✓ Matched</span>';
+    else if (r.status === 'matched-diff') tag = '<span class="tag tag-aamaly">⚠ Amt Diff</span>';
+    else if (r.status === 'only-aamaly') tag = '<span class="tag tag-aamaly">Aamaly only</span>';
+    else tag = '<span class="tag tag-fahes">Fahes only</span>';
+    cells.push(tag);
+
+    cells.push(escHtml(r.key));
+
+    const numA = amtA ? parseNum(r.aamalyRow?.[amtA]) : null;
+    const numF = amtF ? parseNum(r.fahesRow?.[amtF]) : null;
+    if (amtA) cells.push(r.aamalyRow ? fmt(numA, r.aamalyRow[amtA]) : '—');
+    if (amtF) cells.push(r.fahesRow  ? fmt(numF, r.fahesRow[amtF]) : '—');
+    if (amtA && amtF) {
+      if (numA !== null && numF !== null) {
+        const d = numA - numF;
+        cells.push(`<span class="${d !== 0 ? 'amount-diff' : ''}">${d >= 0 ? '+' : ''}${d.toLocaleString()}</span>`);
+      } else cells.push('—');
+    }
+
+    sharedCols.forEach(c => cells.push(escHtml(r.aamalyRow?.[c] ?? '—')));
+    fOnlyCols.forEach(c => cells.push(escHtml(r.fahesRow?.[c] ?? '—')));
+
+    tr.innerHTML = cells.map(c => `<td>${c}</td>`).join('');
+    tbody.appendChild(tr);
+  });
+}
+
+function fmt(num, raw) {
+  if (num !== null) return Number(num).toLocaleString();
+  return escHtml(String(raw ?? ''));
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Tabs
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeTab = btn.dataset.tab;
+    renderTable();
+  });
+});
+
+// Search
+document.getElementById('search').addEventListener('input', renderTable);
+
+// ─── Export ───────────────────────────────────────────────────────────────────
+document.getElementById('export-btn').addEventListener('click', () => {
+  const { colA, colF, amtA, amtF } = window._reconcileState || {};
+  const wb = XLSX.utils.book_new();
+
+  const toSheet = (rows) => {
+    if (!rows.length) return XLSX.utils.aoa_to_sheet([['No data']]);
+    return XLSX.utils.json_to_sheet(rows.map(r => {
+      const obj = { Status: r.status, MatchKey: r.key };
+      if (r.aamalyRow) headAamaly.forEach(h => obj['A_'+h] = r.aamalyRow[h]);
+      if (r.fahesRow)  headFahes.forEach(h  => obj['F_'+h]  = r.fahesRow[h]);
+      if (amtA && amtF) obj['Amount_Diff'] = (parseNum(r.aamalyRow?.[amtA]) ?? 0) - (parseNum(r.fahesRow?.[amtF]) ?? 0);
+      return obj;
+    }));
+  };
+
+  XLSX.utils.book_append_sheet(wb, toSheet(allRows.filter(r => r.status==='matched'||r.status==='matched-diff')), 'Matched');
+  XLSX.utils.book_append_sheet(wb, toSheet(allRows.filter(r => r.status==='only-aamaly')), 'Only_Aamaly');
+  XLSX.utils.book_append_sheet(wb, toSheet(allRows.filter(r => r.status==='only-fahes')),  'Only_Fahes');
+  XLSX.utils.book_append_sheet(wb, toSheet(allRows), 'All');
+  XLSX.writeFile(wb, `reconciliation_${new Date().toISOString().slice(0,10)}.xlsx`);
+});
+</script>
+</body>
+</html>
