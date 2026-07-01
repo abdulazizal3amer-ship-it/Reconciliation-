@@ -289,6 +289,10 @@
       <select id="amt-fahes"><option value="">(none)</option></select>
     </div>
     <div class="config-group">
+      <label>Operation Type Column <span style="font-size:0.7rem;color:var(--text-muted)">(optional)</span></label>
+      <select id="optype-col"><option value="">(none)</option></select>
+    </div>
+    <div class="config-group">
       <label>Match tolerance</label>
       <select id="match-mode">
         <option value="exact">Exact</option>
@@ -495,6 +499,7 @@ document.getElementById('file-aamaly').addEventListener('change', e => {
     populateSelect(document.getElementById('amt-aamaly'), headers, '(none)');
     document.getElementById('col-aamaly').value = autoDetect(headers, ['ref','id','txn','transaction','رقم']);
     document.getElementById('amt-aamaly').value = autoDetect(headers, ['amount','مبلغ','value','total']);
+    refreshOpTypeSelect();
     checkReady();
   });
 });
@@ -508,9 +513,16 @@ document.getElementById('file-fahes').addEventListener('change', e => {
     populateSelect(document.getElementById('amt-fahes'), headers, '(none)');
     document.getElementById('col-fahes').value = autoDetect(headers, ['ref','id','txn','transaction','رقم']);
     document.getElementById('amt-fahes').value = autoDetect(headers, ['amount','مبلغ','value','total']);
+    refreshOpTypeSelect();
     checkReady();
   });
 });
+
+function refreshOpTypeSelect() {
+  const allHeaders = [...new Set([...(headAamaly||[]), ...(headFahes||[])])];
+  populateSelect(document.getElementById('optype-col'), allHeaders, '(none)');
+  document.getElementById('optype-col').value = autoDetect(allHeaders, ['operationtype','operation_type','type','نوع','txntype','transactiontype','trans_type']);
+}
 
 ['aamaly','fahes'].forEach(side => {
   const drop = document.getElementById(`drop-${side}`);
@@ -544,6 +556,7 @@ document.getElementById('reconcile').addEventListener('click', () => {
   const colF = document.getElementById('col-fahes').value;
   const amtA = document.getElementById('amt-aamaly').value;
   const amtF = document.getElementById('amt-fahes').value;
+  const opTypeCol = document.getElementById('optype-col').value;
   const mode = document.getElementById('match-mode').value;
 
   if (!colA || !colF) { alert('Please select a match column for both files.'); return; }
@@ -588,7 +601,7 @@ document.getElementById('reconcile').addEventListener('click', () => {
     });
   });
 
-  window._reconcileState = { colA, colF, amtA, amtF, mode };
+  window._reconcileState = { colA, colF, amtA, amtF, opTypeCol, mode };
   document.getElementById('suggest-banner').style.display = 'none';
   renderResults();
 });
@@ -985,7 +998,7 @@ document.getElementById('clear-btn').addEventListener('click', () => {
   ['col-aamaly','col-fahes'].forEach(id => {
     document.getElementById(id).innerHTML = `<option value="">— load file first —</option>`;
   });
-  ['amt-aamaly','amt-fahes'].forEach(id => {
+  ['amt-aamaly','amt-fahes','optype-col'].forEach(id => {
     document.getElementById(id).innerHTML = `<option value="">(none)</option>`;
   });
 
@@ -1073,22 +1086,40 @@ function renderBreakdown(unmatched, _unused1, _unused2, hasAmt) {
     reasonRows[label].push(r);
   });
 
+  const { opTypeCol } = window._reconcileState || {};
+  // Keywords that identify a refund/reversal in the OperationType column
+  const REFUND_OP_WORDS = ['refund','refunded','reversal','reverse','reversed','رد','استرداد','مرتجع','credit','إلغاء','cancel','void'];
+
+  function isRefundOp(r) {
+    if (!opTypeCol) return false;
+    const val = String(r.aamalyRow?.[opTypeCol] ?? r.fahesRow?.[opTypeCol] ?? '').trim().toLowerCase();
+    return REFUND_OP_WORDS.some(w => val.includes(w));
+  }
+
   Object.entries(reasonRows).forEach(([label, rows]) => {
     let pos = 0, neg = 0;
     if (label === 'Duplicate') {
-      // Auto-pair: for each unique absolute amount, every pair cancels out (+/-)
-      // Remaining unpaired transactions count as positive
-      const amtBuckets = {};
-      rows.forEach(r => {
-        const raw = Math.abs(rowAmtGlobal(r));
-        amtBuckets[raw] = (amtBuckets[raw] || 0) + 1;
-      });
-      Object.entries(amtBuckets).forEach(([amt, cnt]) => {
-        const a = parseFloat(amt);
-        const pairs = Math.floor(cnt / 2);
-        pos += pairs * a + (cnt % 2) * a; // paired positive side + unpaired
-        neg -= pairs * a;                 // paired negative side
-      });
+      if (opTypeCol) {
+        // Use OperationType column: refund ops → negative, payment ops → positive
+        rows.forEach(r => {
+          const raw = Math.abs(rowAmtGlobal(r));
+          if (isRefundOp(r)) neg -= raw;
+          else               pos += raw;
+        });
+      } else {
+        // Fallback: auto-pair identical amounts so each pair nets to zero
+        const amtBuckets = {};
+        rows.forEach(r => {
+          const raw = Math.abs(rowAmtGlobal(r));
+          amtBuckets[raw] = (amtBuckets[raw] || 0) + 1;
+        });
+        Object.entries(amtBuckets).forEach(([amt, cnt]) => {
+          const a = parseFloat(amt);
+          const pairs = Math.floor(cnt / 2);
+          pos += pairs * a + (cnt % 2) * a;
+          neg -= pairs * a;
+        });
+      }
     } else {
       rows.forEach(r => {
         const amt = rowAmtGlobal(r);
