@@ -239,6 +239,40 @@
     .ab-row.ab-total  { background: #f8fafc; font-weight: 700; border-top: 2px solid var(--border); }
     .ab-balanced      { display:inline-block; background:#dcfce7; color:#16a34a; border-radius:4px; font-size:0.68rem; font-weight:700; padding:1px 6px; margin-left:4px; }
     .ab-section-head  { padding: 6px 18px; background: #f8fafc; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); border-bottom: 1px solid var(--border); }
+
+    /* ── Merge Tool ── */
+    .merge-section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; margin-top: 40px; }
+    .merge-section h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
+    .merge-section .sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 20px; }
+    .merge-drop-zone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 32px 20px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; position: relative; background: #f8fafc; }
+    .merge-drop-zone:hover, .merge-drop-zone.drag-over { border-color: var(--primary); background: #eff6ff; }
+    .merge-drop-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .merge-drop-zone .icon { font-size: 2.2rem; margin-bottom: 8px; }
+    .merge-drop-zone p { font-size: 0.85rem; color: var(--muted); }
+    .merge-file-list { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; }
+    .merge-file-item { display: flex; align-items: center; justify-content: space-between; background: #f1f5f9; border-radius: 6px; padding: 7px 12px; font-size: 0.83rem; }
+    .merge-file-item .mf-name { font-weight: 600; color: var(--text); }
+    .merge-file-item .mf-rows { color: var(--muted); font-size: 0.78rem; }
+    .merge-file-item .mf-remove { background: none; border: none; cursor: pointer; color: #dc2626; font-size: 1rem; padding: 0 4px; line-height: 1; }
+    .merge-file-item .mf-warn { color: #d97706; font-size: 0.75rem; margin-left: 6px; }
+    .merge-status { margin-top: 16px; padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; display: none; }
+    .merge-status.ok  { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    .merge-status.err { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .merge-actions { margin-top: 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .merge-btn { background: var(--primary); color: #fff; border: none; border-radius: 8px; padding: 10px 22px; font-size: 0.92rem; font-weight: 600; cursor: pointer; }
+    .merge-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .merge-btn:not(:disabled):hover { background: var(--primary-hover); }
+    .merge-clear-btn { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 9px 16px; font-size: 0.85rem; color: var(--muted); cursor: pointer; }
+    .merge-clear-btn:hover { border-color: #dc2626; color: #dc2626; }
+    .merge-preview { margin-top: 20px; display: none; }
+    .merge-preview table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    .merge-preview th { background: #f1f5f9; border: 1px solid var(--border); padding: 6px 10px; text-align: left; font-weight: 600; white-space: nowrap; }
+    .merge-preview td { border: 1px solid var(--border); padding: 5px 10px; white-space: nowrap; }
+    .merge-preview tr:nth-child(even) td { background: #f8fafc; }
+    .merge-preview-wrap { overflow-x: auto; max-height: 320px; overflow-y: auto; border-radius: 6px; border: 1px solid var(--border); }
+    .merge-summary-bar { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 12px; }
+    .merge-stat { background: #f1f5f9; border-radius: 8px; padding: 8px 16px; font-size: 0.82rem; }
+    .merge-stat strong { font-size: 1rem; display: block; color: var(--primary); }
   </style>
 </head>
 <body>
@@ -429,6 +463,39 @@
     </div>
   </div>
 
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════════ MERGE TOOL -->
+<main>
+  <div class="merge-section">
+    <h2>📋 Merge Excel Files</h2>
+    <p class="sub">Upload multiple Excel / CSV files with the same column headers — all rows will be combined into one downloadable file.</p>
+
+    <div class="merge-drop-zone" id="merge-drop">
+      <input type="file" id="merge-files" accept=".xlsx,.xls,.csv" multiple />
+      <div class="icon">📂</div>
+      <p>Click or drag &amp; drop multiple Excel / CSV files here</p>
+    </div>
+
+    <div class="merge-file-list" id="merge-file-list"></div>
+    <div class="merge-status" id="merge-status"></div>
+
+    <div class="merge-actions">
+      <button class="merge-btn" id="merge-btn" disabled>⬇ Download Merged File</button>
+      <button class="merge-clear-btn" id="merge-clear-btn">✕ Clear All</button>
+    </div>
+
+    <div class="merge-preview" id="merge-preview">
+      <div class="merge-summary-bar" id="merge-summary-bar"></div>
+      <div class="merge-preview-wrap">
+        <table id="merge-preview-table">
+          <thead id="merge-preview-head"></thead>
+          <tbody id="merge-preview-body"></tbody>
+        </table>
+      </div>
+      <p style="margin-top:8px;font-size:0.75rem;color:var(--muted)">Showing first 100 rows of merged data.</p>
+    </div>
+  </div>
 </main>
 
 <script>
@@ -1210,6 +1277,140 @@ function fmt(num, raw) {
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════ MERGE TOOL
+(function () {
+  let mergeFiles = []; // [{name, headers, rows}]
+
+  const dropZone   = document.getElementById('merge-drop');
+  const fileInput  = document.getElementById('merge-files');
+  const fileList   = document.getElementById('merge-file-list');
+  const statusEl   = document.getElementById('merge-status');
+  const mergeBtn   = document.getElementById('merge-btn');
+  const clearBtn   = document.getElementById('merge-clear-btn');
+  const previewEl  = document.getElementById('merge-preview');
+  const summaryBar = document.getElementById('merge-summary-bar');
+  const previewHead= document.getElementById('merge-preview-head');
+  const previewBody= document.getElementById('merge-preview-body');
+
+  // ── Drag & drop ──
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault(); dropZone.classList.remove('drag-over');
+    loadFiles([...e.dataTransfer.files]);
+  });
+  fileInput.addEventListener('change', e => { loadFiles([...e.target.files]); e.target.value = ''; });
+
+  clearBtn.addEventListener('click', () => { mergeFiles = []; refresh(); });
+
+  mergeBtn.addEventListener('click', downloadMerged);
+
+  function loadFiles(files) {
+    files.forEach(f => {
+      if (mergeFiles.find(m => m.name === f.name)) return; // skip duplicate names
+      readMergeFile(f, (headers, rows) => {
+        mergeFiles.push({ name: f.name, headers, rows });
+        refresh();
+      });
+    });
+  }
+
+  function readMergeFile(file, cb) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(ws, { defval: '' });
+      const headers = data.length ? Object.keys(data[0]) : [];
+      cb(headers, data);
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function refresh() {
+    // Render file list
+    fileList.innerHTML = mergeFiles.map((m, i) => {
+      const mismatch = mergeFiles.length > 1 && !sameHeaders(mergeFiles[0].headers, m.headers);
+      return `<div class="merge-file-item">
+        <span>
+          <span class="mf-name">${escMerge(m.name)}</span>
+          ${mismatch ? '<span class="mf-warn">⚠ Column mismatch</span>' : ''}
+        </span>
+        <span style="display:flex;align-items:center;gap:10px">
+          <span class="mf-rows">${m.rows.length.toLocaleString()} rows · ${m.headers.length} cols</span>
+          <button class="mf-remove" onclick="mergeRemove(${i})" title="Remove">✕</button>
+        </span>
+      </div>`;
+    }).join('');
+
+    // Validate
+    const { ok, msg, headers } = validate();
+    statusEl.style.display = mergeFiles.length ? '' : 'none';
+    statusEl.className = 'merge-status ' + (ok ? 'ok' : 'err');
+    statusEl.textContent = msg;
+    mergeBtn.disabled = !ok;
+
+    if (ok && mergeFiles.length) {
+      renderPreview(headers);
+    } else {
+      previewEl.style.display = 'none';
+    }
+  }
+
+  function validate() {
+    if (!mergeFiles.length) return { ok: false, msg: '' };
+    if (mergeFiles.length === 1) return { ok: true, msg: `1 file loaded — add more to merge.`, headers: mergeFiles[0].headers };
+    const base = mergeFiles[0].headers;
+    const bad = mergeFiles.filter(m => !sameHeaders(base, m.headers));
+    if (bad.length) {
+      return { ok: false, msg: `Column mismatch in: ${bad.map(m=>m.name).join(', ')}. All files must have the same column names.` };
+    }
+    const total = mergeFiles.reduce((s, m) => s + m.rows.length, 0);
+    return { ok: true, msg: `✓ ${mergeFiles.length} files · ${total.toLocaleString()} total rows · ${base.length} columns — ready to merge.`, headers: base };
+  }
+
+  function sameHeaders(a, b) {
+    if (a.length !== b.length) return false;
+    return a.every((h, i) => h === b[i]);
+  }
+
+  function renderPreview(headers) {
+    const allRows = mergeFiles.flatMap(m => m.rows);
+    const total = allRows.length;
+
+    summaryBar.innerHTML = mergeFiles.map(m =>
+      `<div class="merge-stat"><strong>${m.rows.length.toLocaleString()}</strong>${escMerge(m.name)}</div>`
+    ).join('') + `<div class="merge-stat" style="border:2px solid var(--primary)"><strong>${total.toLocaleString()}</strong>Total rows</div>`;
+
+    previewHead.innerHTML = `<tr>${headers.map(h => `<th>${escMerge(h)}</th>`).join('')}</tr>`;
+    const preview = allRows.slice(0, 100);
+    previewBody.innerHTML = preview.map(row =>
+      `<tr>${headers.map(h => `<td>${escMerge(String(row[h] ?? ''))}</td>`).join('')}</tr>`
+    ).join('');
+
+    previewEl.style.display = '';
+  }
+
+  function downloadMerged() {
+    const { headers } = validate();
+    if (!headers) return;
+    const allRows = mergeFiles.flatMap(m => m.rows);
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(allRows, { header: headers });
+    XLSX.utils.book_append_sheet(wb, ws, 'Merged');
+    XLSX.writeFile(wb, 'merged_data.xlsx');
+  }
+
+  function escMerge(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // Exposed for inline onclick
+  window.mergeRemove = function(i) { mergeFiles.splice(i, 1); refresh(); };
+})();
 </script>
 </body>
 </html>
