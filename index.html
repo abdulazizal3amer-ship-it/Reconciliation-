@@ -840,7 +840,7 @@ function renderTable() {
 
     const numA = amtA ? parseNum(r.aamalyRow?.[amtA]) : null;
     const numF = amtF ? parseNum(r.fahesRow?.[amtF])  : null;
-    const isNegated = NEGATIVE_REASONS.has(r.reason) || r.negated;
+    const isNegated = NEGATIVE_REASONS.has(r.reason) || r.negated || (r.reason === 'Duplicate' && isRefundOp(r));
     const dispA = numA !== null && isNegated && numA > 0 ? -numA : numA;
     const dispF = numF !== null && isNegated && numF > 0 ? -numF : numF;
     if (amtA) cells.push(r.aamalyRow ? `<span${isNegated ? ' style="color:#a855f7;font-weight:600"' : ''}>${fmt(dispA, r.aamalyRow[amtA])}</span>` : '—');
@@ -1087,14 +1087,6 @@ function renderBreakdown(unmatched, _unused1, _unused2, hasAmt) {
   });
 
   const { opTypeCol } = window._reconcileState || {};
-  // Keywords that identify a refund/reversal in the OperationType column
-  const REFUND_OP_WORDS = ['refund','refunded','reversal','reverse','reversed','رد','استرداد','مرتجع','credit','إلغاء','cancel','void'];
-
-  function isRefundOp(r) {
-    if (!opTypeCol) return false;
-    const val = String(r.aamalyRow?.[opTypeCol] ?? r.fahesRow?.[opTypeCol] ?? '').trim().toLowerCase();
-    return REFUND_OP_WORDS.some(w => val.includes(w));
-  }
 
   Object.entries(reasonRows).forEach(([label, rows]) => {
     let pos = 0, neg = 0;
@@ -1187,13 +1179,25 @@ function abRow(color, label, count, pos, neg, net, absBase, isTotal = false) {
   </div>`;
 }
 
+const REFUND_OP_WORDS = ['refund','refunded','reversal','reverse','reversed','رد','استرداد','مرتجع','credit','إلغاء','cancel','void'];
+
+function isRefundOp(r) {
+  const { opTypeCol } = window._reconcileState || {};
+  if (!opTypeCol) return false;
+  const val = String(r.aamalyRow?.[opTypeCol] ?? r.fahesRow?.[opTypeCol] ?? '').trim().toLowerCase();
+  return REFUND_OP_WORDS.some(w => val.includes(w));
+}
+
 function rowAmtGlobal(r) {
   const { amtA, amtF } = window._reconcileState || {};
   const a = amtA && r.aamalyRow ? parseNum(r.aamalyRow[amtA]) : null;
   const f = amtF && r.fahesRow  ? parseNum(r.fahesRow[amtF])  : null;
   const raw = a ?? f ?? 0;
-  // Flip to negative for refund-type reasons OR when row is manually negated
-  const shouldNegate = (NEGATIVE_REASONS.has(r.reason) && raw > 0) || (r.negated && raw > 0);
+  // Flip to negative for: refund-type reasons, manually negated rows,
+  // OR Duplicate rows whose OperationType column indicates a refund
+  const shouldNegate = (NEGATIVE_REASONS.has(r.reason) && raw > 0)
+                    || (r.negated && raw > 0)
+                    || (r.reason === 'Duplicate' && raw > 0 && isRefundOp(r));
   return shouldNegate ? -raw : raw;
 }
 
