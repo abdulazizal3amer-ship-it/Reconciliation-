@@ -429,10 +429,14 @@
 
 <script>
 // ─── Constants ────────────────────────────────────────────────────────────────
-const REASONS = ['', 'Refunded', 'Duplicate', 'Pending', 'Timing Difference', 'Data Error', 'Under Review', 'Resolved', 'Other'];
+const REASONS = ['', 'Refunded', 'Duplicate', 'Duplicate – Refund', 'Pending', 'Timing Difference', 'Data Error', 'Under Review', 'Resolved', 'Other'];
+
+// Reasons that are treated as negative amounts (like refunds)
+const NEGATIVE_REASONS = new Set(['Refunded', 'Duplicate – Refund']);
 
 const REASON_COLORS = {
   'Refunded':          '#a855f7',
+  'Duplicate – Refund':'#a855f7',
   'Duplicate':         '#0891b2',
   'Pending':           '#f59e0b',
   'Timing Difference': '#6366f1',
@@ -823,7 +827,7 @@ function renderTable() {
 
     const numA = amtA ? parseNum(r.aamalyRow?.[amtA]) : null;
     const numF = amtF ? parseNum(r.fahesRow?.[amtF])  : null;
-    const isNegated = r.reason === 'Refunded' || r.negated;
+    const isNegated = NEGATIVE_REASONS.has(r.reason) || r.negated;
     const dispA = numA !== null && isNegated && numA > 0 ? -numA : numA;
     const dispF = numF !== null && isNegated && numF > 0 ? -numF : numF;
     if (amtA) cells.push(r.aamalyRow ? `<span${isNegated ? ' style="color:#a855f7;font-weight:600"' : ''}>${fmt(dispA, r.aamalyRow[amtA])}</span>` : '—');
@@ -1086,15 +1090,15 @@ function renderBreakdown(unmatched, _unused1, _unused2, hasAmt) {
   html += abRow('#16a34a', 'Matched', matched.length, matchedPos, matchedNeg, sumMatched, absBase);
 
   // ── Unmatched by reason ──
-  html += `<div class="ab-section-head">Unmatched – by Reason (Refunded shown as negative)</div>`;
+  html += `<div class="ab-section-head">Unmatched – by Reason (Refunded &amp; Duplicate–Refund shown as negative)</div>`;
 
-  const reasonOrder = ['Refunded','Duplicate','Pending','Timing Difference','Data Error','Under Review','Resolved','Other','Untagged'];
+  const reasonOrder = ['Refunded','Duplicate','Duplicate – Refund','Pending','Timing Difference','Data Error','Under Review','Resolved','Other','Untagged'];
 
   reasonOrder.forEach(rsn => {
     if (!reasonGroups[rsn]) return;
     const { count, pos, neg } = reasonGroups[rsn];
     const net = pos + neg;
-    const color = rsn === 'Refunded' ? '#a855f7' : (REASON_COLORS[rsn] || '#94a3b8');
+    const color = NEGATIVE_REASONS.has(rsn) ? '#a855f7' : (REASON_COLORS[rsn] || '#94a3b8');
     html += abRow(color, rsn, count, pos, neg, net, absBase);
   });
 
@@ -1133,8 +1137,8 @@ function rowAmtGlobal(r) {
   const a = amtA && r.aamalyRow ? parseNum(r.aamalyRow[amtA]) : null;
   const f = amtF && r.fahesRow  ? parseNum(r.fahesRow[amtF])  : null;
   const raw = a ?? f ?? 0;
-  // Flip to negative for Refunded reason OR when row is manually negated
-  const shouldNegate = (r.reason === 'Refunded' && raw > 0) || (r.negated && raw > 0);
+  // Flip to negative for refund-type reasons OR when row is manually negated
+  const shouldNegate = (NEGATIVE_REASONS.has(r.reason) && raw > 0) || (r.negated && raw > 0);
   return shouldNegate ? -raw : raw;
 }
 
