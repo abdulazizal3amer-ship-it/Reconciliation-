@@ -195,6 +195,43 @@
     #results { display: none; }
     .amount-diff { font-weight: 600; color: var(--fahes); }
     .tagged-progress { margin-left: auto; font-size: 0.78rem; color: var(--muted); }
+
+    /* Amount totals on summary cards */
+    .summary-card .amt { font-size: 0.82rem; font-weight: 700; margin-top: 4px; opacity: .85; }
+
+    /* Amount breakdown table */
+    .amount-breakdown {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .amount-breakdown .ab-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 18px; background: #f8fafc; border-bottom: 1px solid var(--border);
+      cursor: pointer; user-select: none;
+    }
+    .amount-breakdown .ab-header strong { font-size: 0.88rem; color: var(--text); }
+    .amount-breakdown .ab-header span   { font-size: 0.78rem; color: var(--muted); }
+    .ab-body { padding: 0; }
+    .ab-row {
+      display: grid;
+      grid-template-columns: 28px 1fr auto auto auto;
+      gap: 0 16px;
+      align-items: center;
+      padding: 10px 18px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.83rem;
+    }
+    .ab-row:last-child { border-bottom: none; }
+    .ab-row .ab-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    .ab-row .ab-label { font-weight: 600; }
+    .ab-row .ab-count { color: var(--muted); font-size: 0.78rem; text-align: right; white-space: nowrap; }
+    .ab-row .ab-amt   { font-weight: 700; text-align: right; white-space: nowrap; }
+    .ab-row .ab-pct   { color: var(--muted); font-size: 0.76rem; text-align: right; white-space: nowrap; }
+    .ab-row.ab-total  { background: #f8fafc; font-weight: 700; border-top: 2px solid var(--border); }
+    .ab-section-head  { padding: 6px 18px; background: #f8fafc; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); border-bottom: 1px solid var(--border); }
   </style>
 </head>
 <body>
@@ -267,16 +304,19 @@
         <div class="label">Matched</div>
         <div class="count" id="cnt-matched">0</div>
         <div style="font-size:.8rem;color:var(--muted)">transactions reconciled</div>
+        <div class="amt" id="amt-matched" style="color:var(--matched)"></div>
       </div>
       <div class="summary-card only-aamaly">
         <div class="label">Only in Aamaly</div>
         <div class="count" id="cnt-aamaly">0</div>
         <div style="font-size:.8rem;color:var(--muted)">not found in Fahes</div>
+        <div class="amt" id="amt-aamaly" style="color:var(--aamaly)"></div>
       </div>
       <div class="summary-card only-fahes">
         <div class="label">Only in Fahes</div>
         <div class="count" id="cnt-fahes">0</div>
         <div style="font-size:.8rem;color:var(--muted)">not found in Aamaly</div>
+        <div class="amt" id="amt-fahes" style="color:var(--fahes)"></div>
       </div>
     </div>
 
@@ -306,6 +346,15 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Amount breakdown by reason -->
+    <div class="amount-breakdown" id="amt-breakdown" style="display:none">
+      <div class="ab-header" onclick="toggleBreakdown()">
+        <strong>💰 Amount Breakdown by Status &amp; Reason</strong>
+        <span id="ab-toggle-label">▼ collapse</span>
+      </div>
+      <div class="ab-body" id="ab-body"></div>
     </div>
 
     <!-- Auto-suggest result banner -->
@@ -663,6 +712,22 @@ function renderResults() {
   document.getElementById('tagged-count').textContent  = tagged.length;
   document.getElementById('unmatched-count').textContent = unmatched.length;
 
+  // ── Amount totals on summary cards ──
+  const amtA = window._reconcileState?.amtA;
+  const amtF = window._reconcileState?.amtF;
+
+  const sumMatched = matched.reduce((s, r) => s + rowAmtGlobal(r), 0);
+  const sumOnlyA   = onlyA.reduce((s, r) => s + rowAmtGlobal(r), 0);
+  const sumOnlyF   = onlyF.reduce((s, r) => s + rowAmtGlobal(r), 0);
+
+  const hasAmt = amtA || amtF;
+  document.getElementById('amt-matched').textContent = hasAmt ? fmtAmt(sumMatched) : '';
+  document.getElementById('amt-aamaly').textContent  = hasAmt ? fmtAmt(sumOnlyA)   : '';
+  document.getElementById('amt-fahes').textContent   = hasAmt ? fmtAmt(sumOnlyF)   : '';
+
+  // ── Amount breakdown by reason ──
+  renderBreakdown(unmatched, sumMatched, sumOnlyA + sumOnlyF, hasAmt);
+
   // File totals
   const totalA = dataAamaly.length;
   const totalF = dataFahes.length;
@@ -838,6 +903,15 @@ function updateTaggedCount() {
   const unmatched = allRows.filter(r => r.status === 'only-aamaly' || r.status === 'only-fahes');
   document.getElementById('tagged-count').textContent   = unmatched.filter(r => r.reason).length;
   document.getElementById('pill-untagged').textContent  = unmatched.filter(r => !r.reason).length;
+  // Refresh amount breakdown when tags change
+  const { amtA, amtF } = window._reconcileState || {};
+  const matched = allRows.filter(r => r.status === 'matched' || r.status === 'matched-diff');
+  const onlyA   = allRows.filter(r => r.status === 'only-aamaly');
+  const onlyF   = allRows.filter(r => r.status === 'only-fahes');
+  const sumMatched = matched.reduce((s, r) => s + rowAmtGlobal(r), 0);
+  const sumOnlyA   = onlyA.reduce((s, r) => s + rowAmtGlobal(r), 0);
+  const sumOnlyF   = onlyF.reduce((s, r) => s + rowAmtGlobal(r), 0);
+  renderBreakdown(unmatched, sumMatched, sumOnlyA + sumOnlyF, amtA || amtF);
 }
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
@@ -936,6 +1010,97 @@ document.getElementById('export-btn').addEventListener('click', () => {
   XLSX.utils.book_append_sheet(wb, toSheet(allRows), 'All');
   XLSX.writeFile(wb, `reconciliation_${new Date().toISOString().slice(0,10)}.xlsx`);
 });
+
+// ─── Amount Breakdown ─────────────────────────────────────────────────────────
+let breakdownOpen = true;
+
+function toggleBreakdown() {
+  breakdownOpen = !breakdownOpen;
+  document.getElementById('ab-body').style.display = breakdownOpen ? '' : 'none';
+  document.getElementById('ab-toggle-label').textContent = breakdownOpen ? '▼ collapse' : '▶ expand';
+}
+
+function fmtAmt(n) {
+  if (n === 0) return '0';
+  return n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+
+function renderBreakdown(unmatched, sumMatched, sumUnmatched, hasAmt) {
+  const el = document.getElementById('amt-breakdown');
+  const body = document.getElementById('ab-body');
+  if (!hasAmt) { el.style.display = 'none'; return; }
+  el.style.display = '';
+
+  // Group unmatched by reason
+  const reasonGroups = {};
+  unmatched.forEach(r => {
+    const label = r.reason || 'Untagged';
+    if (!reasonGroups[label]) reasonGroups[label] = { count: 0, sum: 0 };
+    reasonGroups[label].count++;
+    reasonGroups[label].sum += rowAmtGlobal(r);
+  });
+
+  const totalAll = sumMatched + sumUnmatched;
+
+  let html = '';
+
+  // ── Matched section ──
+  html += `<div class="ab-section-head">Matched Transactions</div>`;
+  html += abRow('#16a34a', 'Matched', allRows.filter(r=>r.status==='matched'||r.status==='matched-diff').length, sumMatched, totalAll);
+
+  // ── Unmatched by reason ──
+  html += `<div class="ab-section-head">Unmatched – by Reason</div>`;
+
+  const reasonOrder = ['Refunded','Duplicate','Pending','Timing Difference','Data Error','Under Review','Resolved','Other','Untagged'];
+  let unmatchedTotal = 0, unmatchedCount = 0;
+
+  reasonOrder.forEach(rsn => {
+    if (!reasonGroups[rsn]) return;
+    const { count, sum } = reasonGroups[rsn];
+    const color = REASON_COLORS[rsn] || '#94a3b8';
+    html += abRow(color, rsn, count, sum, totalAll);
+    unmatchedTotal += sum;
+    unmatchedCount += count;
+  });
+
+  // Any other reasons not in standard list
+  Object.entries(reasonGroups).forEach(([rsn, { count, sum }]) => {
+    if (reasonOrder.includes(rsn)) return;
+    html += abRow('#94a3b8', rsn, count, sum, totalAll);
+    unmatchedTotal += sum;
+    unmatchedCount += count;
+  });
+
+  // ── Grand total ──
+  html += `<div class="ab-section-head">Grand Total</div>`;
+  html += `<div class="ab-row ab-total">
+    <span></span>
+    <span class="ab-label">All Transactions</span>
+    <span class="ab-count">${(allRows.length).toLocaleString()} rows</span>
+    <span class="ab-amt">${fmtAmt(totalAll)}</span>
+    <span class="ab-pct">100%</span>
+  </div>`;
+
+  body.innerHTML = html;
+}
+
+function abRow(color, label, count, sum, total) {
+  const pct = total ? ((Math.abs(sum) / Math.abs(total)) * 100).toFixed(1) : '0.0';
+  return `<div class="ab-row">
+    <span class="ab-dot" style="background:${color}"></span>
+    <span class="ab-label">${escHtml(label)}</span>
+    <span class="ab-count">${count.toLocaleString()} rows</span>
+    <span class="ab-amt" style="color:${color}">${fmtAmt(sum)}</span>
+    <span class="ab-pct">${pct}%</span>
+  </div>`;
+}
+
+function rowAmtGlobal(r) {
+  const { amtA, amtF } = window._reconcileState || {};
+  const a = amtA && r.aamalyRow ? parseNum(r.aamalyRow[amtA]) : null;
+  const f = amtF && r.fahesRow  ? parseNum(r.fahesRow[amtF])  : null;
+  return a ?? f ?? 0;
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function fmt(num, raw) {
