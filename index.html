@@ -217,20 +217,24 @@
     .ab-body { padding: 0; }
     .ab-row {
       display: grid;
-      grid-template-columns: 28px 1fr auto auto auto;
-      gap: 0 16px;
+      grid-template-columns: 28px 1fr auto auto auto auto auto;
+      gap: 0 14px;
       align-items: center;
       padding: 10px 18px;
       border-bottom: 1px solid #f1f5f9;
       font-size: 0.83rem;
     }
     .ab-row:last-child { border-bottom: none; }
-    .ab-row .ab-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    .ab-row { grid-template-columns: 28px 1fr auto auto auto auto auto; }
+    .ab-row .ab-dot   { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
     .ab-row .ab-label { font-weight: 600; }
     .ab-row .ab-count { color: var(--muted); font-size: 0.78rem; text-align: right; white-space: nowrap; }
+    .ab-row .ab-pos   { color: var(--matched); font-weight: 600; text-align: right; white-space: nowrap; font-size: 0.8rem; }
+    .ab-row .ab-neg   { color: var(--fahes);   font-weight: 600; text-align: right; white-space: nowrap; font-size: 0.8rem; }
     .ab-row .ab-amt   { font-weight: 700; text-align: right; white-space: nowrap; }
     .ab-row .ab-pct   { color: var(--muted); font-size: 0.76rem; text-align: right; white-space: nowrap; }
     .ab-row.ab-total  { background: #f8fafc; font-weight: 700; border-top: 2px solid var(--border); }
+    .ab-balanced      { display:inline-block; background:#dcfce7; color:#16a34a; border-radius:4px; font-size:0.68rem; font-weight:700; padding:1px 6px; margin-left:4px; }
     .ab-section-head  { padding: 6px 18px; background: #f8fafc; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); border-bottom: 1px solid var(--border); }
   </style>
 </head>
@@ -1038,13 +1042,15 @@ function renderBreakdown(unmatched, _unused1, _unused2, hasAmt) {
   const matched = allRows.filter(r => r.status === 'matched' || r.status === 'matched-diff');
   const sumMatched = matched.reduce((s, r) => s + rowAmtGlobal(r), 0);
 
-  // Group unmatched by reason — refunded rows contribute negative amounts
+  // Group unmatched by reason — track pos/neg separately so Duplicates can show net=0
   const reasonGroups = {};
   unmatched.forEach(r => {
     const label = r.reason || 'Untagged';
-    if (!reasonGroups[label]) reasonGroups[label] = { count: 0, sum: 0 };
+    if (!reasonGroups[label]) reasonGroups[label] = { count: 0, pos: 0, neg: 0 };
+    const amt = rowAmtGlobal(r);
     reasonGroups[label].count++;
-    reasonGroups[label].sum += rowAmtGlobal(r); // negative for Refunded
+    if (amt >= 0) reasonGroups[label].pos += amt;
+    else          reasonGroups[label].neg += amt;
   });
 
   // Grand total = matched + all unmatched (refunded already negative)
@@ -1058,7 +1064,9 @@ function renderBreakdown(unmatched, _unused1, _unused2, hasAmt) {
 
   // ── Matched section ──
   html += `<div class="ab-section-head">Matched Transactions</div>`;
-  html += abRow('#16a34a', 'Matched', matched.length, sumMatched, absBase);
+  const matchedPos = matched.reduce((s,r) => { const a=rowAmtGlobal(r); return s+(a>=0?a:0); }, 0);
+  const matchedNeg = matched.reduce((s,r) => { const a=rowAmtGlobal(r); return s+(a<0?a:0); }, 0);
+  html += abRow('#16a34a', 'Matched', matched.length, matchedPos, matchedNeg, sumMatched, absBase);
 
   // ── Unmatched by reason ──
   html += `<div class="ab-section-head">Unmatched – by Reason (Refunded shown as negative)</div>`;
@@ -1067,36 +1075,38 @@ function renderBreakdown(unmatched, _unused1, _unused2, hasAmt) {
 
   reasonOrder.forEach(rsn => {
     if (!reasonGroups[rsn]) return;
-    const { count, sum } = reasonGroups[rsn];
+    const { count, pos, neg } = reasonGroups[rsn];
+    const net = pos + neg;
     const color = rsn === 'Refunded' ? '#a855f7' : (REASON_COLORS[rsn] || '#94a3b8');
-    html += abRow(color, rsn, count, sum, absBase);
+    html += abRow(color, rsn, count, pos, neg, net, absBase);
   });
 
-  Object.entries(reasonGroups).forEach(([rsn, { count, sum }]) => {
+  Object.entries(reasonGroups).forEach(([rsn, { count, pos, neg }]) => {
     if (reasonOrder.includes(rsn)) return;
-    html += abRow('#94a3b8', rsn, count, sum, absBase);
+    const net = pos + neg;
+    html += abRow('#94a3b8', rsn, count, pos, neg, net, absBase);
   });
 
   // ── Net total ──
   html += `<div class="ab-section-head">Net Total (after deducting Refunded)</div>`;
-  html += `<div class="ab-row ab-total">
-    <span></span>
-    <span class="ab-label">Net Amount</span>
-    <span class="ab-count">${allRows.length.toLocaleString()} rows</span>
-    <span class="ab-amt" style="color:${totalAll < 0 ? '#dc2626' : '#16a34a'}">${fmtAmt(totalAll)}</span>
-    <span class="ab-pct">—</span>
-  </div>`;
+  html += abRow('#0ea5e9', 'Net Amount', allRows.length, 0, 0, totalAll, absBase, true);
 
   body.innerHTML = html;
 }
 
-function abRow(color, label, count, sum, total) {
-  const pct = total ? ((Math.abs(sum) / Math.abs(total)) * 100).toFixed(1) : '0.0';
-  return `<div class="ab-row">
+function abRow(color, label, count, pos, neg, net, absBase, isTotal = false) {
+  const pct = absBase ? ((Math.abs(net) / absBase) * 100).toFixed(1) : '—';
+  const netColor = net < 0 ? '#dc2626' : net === 0 && count > 0 ? '#16a34a' : color;
+  const balanced = net === 0 && count > 0 ? `<span class="ab-balanced">✓ Balanced</span>` : '';
+  const posCell = pos !== 0 ? `<span class="ab-pos">+${fmtAmt(pos)}</span>` : `<span class="ab-pos" style="color:#94a3b8">—</span>`;
+  const negCell = neg !== 0 ? `<span class="ab-neg">${fmtAmt(neg)}</span>` : `<span class="ab-neg" style="color:#94a3b8">—</span>`;
+  return `<div class="ab-row${isTotal ? ' ab-total' : ''}">
     <span class="ab-dot" style="background:${color}"></span>
-    <span class="ab-label">${escHtml(label)}</span>
+    <span class="ab-label">${escHtml(label)}${balanced}</span>
     <span class="ab-count">${count.toLocaleString()} rows</span>
-    <span class="ab-amt" style="color:${color}">${fmtAmt(sum)}</span>
+    ${posCell}
+    ${negCell}
+    <span class="ab-amt" style="color:${netColor}">${fmtAmt(net)}</span>
     <span class="ab-pct">${pct}%</span>
   </div>`;
 }
