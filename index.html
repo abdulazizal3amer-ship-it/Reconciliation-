@@ -176,6 +176,9 @@
     .reason-select { border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 0.8rem; background: var(--card); color: var(--text); outline: none; cursor: pointer; width: 100%; }
     .reason-select:focus { border-color: var(--primary); }
     .reason-select.has-reason { font-weight: 600; }
+    .negate-btn { flex-shrink:0; border:1px solid var(--border); background:var(--card); color:var(--text-muted); border-radius:5px; padding:3px 7px; font-size:0.85rem; font-weight:700; cursor:pointer; line-height:1; }
+    .negate-btn:hover { border-color:#a855f7; color:#a855f7; }
+    .negate-btn.negated { border-color:#a855f7; background:#a855f718; color:#a855f7; }
 
     .reason-note-input { border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 0.79rem; background: var(--card); color: var(--text); outline: none; width: 100%; }
     .reason-note-input:focus { border-color: var(--primary); }
@@ -820,11 +823,11 @@ function renderTable() {
 
     const numA = amtA ? parseNum(r.aamalyRow?.[amtA]) : null;
     const numF = amtF ? parseNum(r.fahesRow?.[amtF])  : null;
-    const isRefunded = r.reason === 'Refunded';
-    const dispA = numA !== null && isRefunded && numA > 0 ? -numA : numA;
-    const dispF = numF !== null && isRefunded && numF > 0 ? -numF : numF;
-    if (amtA) cells.push(r.aamalyRow ? `<span${isRefunded ? ' style="color:#a855f7;font-weight:600"' : ''}>${fmt(dispA, r.aamalyRow[amtA])}</span>` : '—');
-    if (amtF) cells.push(r.fahesRow  ? `<span${isRefunded ? ' style="color:#a855f7;font-weight:600"' : ''}>${fmt(dispF, r.fahesRow[amtF])}</span>`  : '—');
+    const isNegated = r.reason === 'Refunded' || r.negated;
+    const dispA = numA !== null && isNegated && numA > 0 ? -numA : numA;
+    const dispF = numF !== null && isNegated && numF > 0 ? -numF : numF;
+    if (amtA) cells.push(r.aamalyRow ? `<span${isNegated ? ' style="color:#a855f7;font-weight:600"' : ''}>${fmt(dispA, r.aamalyRow[amtA])}</span>` : '—');
+    if (amtF) cells.push(r.fahesRow  ? `<span${isNegated ? ' style="color:#a855f7;font-weight:600"' : ''}>${fmt(dispF, r.fahesRow[amtF])}</span>`  : '—');
     if (amtA && amtF) {
       if (numA !== null && numF !== null) {
         const d = numA - numF;
@@ -852,14 +855,18 @@ function renderTable() {
            </div>`
         : '';
 
+      const negBtn = `<button class="negate-btn${r.negated ? ' negated' : ''}" title="Mark as negative (refund/reversal)" data-idx="${globalIdx}" onclick="toggleNegate(this)">±</button>`;
       cells.push(
         `<div class="reason-cell">
           ${suggestedBadge}
-          <select class="reason-select ${r.reason ? 'has-reason' : ''}"
-                  style="${r.reason ? `border-color:${color};background:${color}18;color:${color}` : ''}"
-                  data-idx="${globalIdx}" onchange="setReason(this)">
-            ${reasonOpts}
-          </select>
+          <div style="display:flex;gap:4px;align-items:center">
+            <select class="reason-select ${r.reason ? 'has-reason' : ''}"
+                    style="${r.reason ? `border-color:${color};background:${color}18;color:${color}` : ''}"
+                    data-idx="${globalIdx}" onchange="setReason(this)">
+              ${reasonOpts}
+            </select>
+            ${negBtn}
+          </div>
         </div>`
       );
       cells.push(
@@ -904,6 +911,16 @@ function setReason(sel) {
 function setNote(input) {
   const idx = parseInt(input.dataset.idx);
   allRows[idx].note = input.value;
+}
+
+function toggleNegate(btn) {
+  const idx = parseInt(btn.dataset.idx);
+  allRows[idx].negated = !allRows[idx].negated;
+  btn.classList.toggle('negated', allRows[idx].negated);
+  btn.title = allRows[idx].negated ? 'Remove negative override' : 'Mark as negative (refund/reversal)';
+  updateTaggedCount(); // refreshes breakdown
+  // Update amount cells in this row without full re-render
+  renderTable();
 }
 
 function updateTaggedCount() {
@@ -1116,8 +1133,9 @@ function rowAmtGlobal(r) {
   const a = amtA && r.aamalyRow ? parseNum(r.aamalyRow[amtA]) : null;
   const f = amtF && r.fahesRow  ? parseNum(r.fahesRow[amtF])  : null;
   const raw = a ?? f ?? 0;
-  // Refunded amounts are always shown as negative
-  return r.reason === 'Refunded' && raw > 0 ? -raw : raw;
+  // Flip to negative for Refunded reason OR when row is manually negated
+  const shouldNegate = (r.reason === 'Refunded' && raw > 0) || (r.negated && raw > 0);
+  return shouldNegate ? -raw : raw;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
