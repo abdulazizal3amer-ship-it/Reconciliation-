@@ -816,8 +816,11 @@ function renderTable() {
 
     const numA = amtA ? parseNum(r.aamalyRow?.[amtA]) : null;
     const numF = amtF ? parseNum(r.fahesRow?.[amtF])  : null;
-    if (amtA) cells.push(r.aamalyRow ? fmt(numA, r.aamalyRow[amtA]) : '—');
-    if (amtF) cells.push(r.fahesRow  ? fmt(numF, r.fahesRow[amtF])  : '—');
+    const isRefunded = r.reason === 'Refunded';
+    const dispA = numA !== null && isRefunded && numA > 0 ? -numA : numA;
+    const dispF = numF !== null && isRefunded && numF > 0 ? -numF : numF;
+    if (amtA) cells.push(r.aamalyRow ? `<span${isRefunded ? ' style="color:#a855f7;font-weight:600"' : ''}>${fmt(dispA, r.aamalyRow[amtA])}</span>` : '—');
+    if (amtF) cells.push(r.fahesRow  ? `<span${isRefunded ? ' style="color:#a855f7;font-weight:600"' : ''}>${fmt(dispF, r.fahesRow[amtF])}</span>`  : '—');
     if (amtA && amtF) {
       if (numA !== null && numF !== null) {
         const d = numA - numF;
@@ -1099,12 +1102,14 @@ function rowAmtGlobal(r) {
   const { amtA, amtF } = window._reconcileState || {};
   const a = amtA && r.aamalyRow ? parseNum(r.aamalyRow[amtA]) : null;
   const f = amtF && r.fahesRow  ? parseNum(r.fahesRow[amtF])  : null;
-  return a ?? f ?? 0;
+  const raw = a ?? f ?? 0;
+  // Refunded amounts are always shown as negative
+  return r.reason === 'Refunded' && raw > 0 ? -raw : raw;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function fmt(num, raw) {
-  if (num !== null) return Number(num).toLocaleString();
+  if (num !== null) return num.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
   return escHtml(String(raw ?? ''));
 }
 
