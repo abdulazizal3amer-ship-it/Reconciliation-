@@ -88,6 +88,33 @@
     .summary-card.only-aamaly .count { color: var(--aamaly); }
     .summary-card.only-fahes .count  { color: var(--fahes); }
 
+    .file-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .file-stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .file-stat-card .fs-icon { font-size: 1.6rem; }
+    .file-stat-card .fs-info { flex: 1; }
+    .file-stat-card .fs-name { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+    .file-stat-card .fs-total { font-size: 1.5rem; font-weight: 700; margin: 2px 0; }
+    .file-stat-card .fs-detail { font-size: 0.76rem; color: var(--muted); }
+    .file-stat-card.aamaly .fs-total { color: var(--aamaly); }
+    .file-stat-card.fahes  .fs-total { color: var(--fahes); }
+    .fs-bar { display: flex; gap: 3px; margin-top: 6px; height: 6px; border-radius: 3px; overflow: hidden; background: #f1f5f9; }
+    .fs-bar-matched { background: var(--matched); }
+    .fs-bar-unmatched-a { background: var(--aamaly); }
+    .fs-bar-unmatched-f { background: var(--fahes); }
+
     /* Auto-suggest banner */
     .suggest-banner {
       background: linear-gradient(135deg, #ede9fe, #dbeafe);
@@ -250,6 +277,34 @@
         <div class="label">Only in Fahes</div>
         <div class="count" id="cnt-fahes">0</div>
         <div style="font-size:.8rem;color:var(--muted)">not found in Aamaly</div>
+      </div>
+    </div>
+
+    <!-- File row totals -->
+    <div class="file-stats">
+      <div class="file-stat-card aamaly">
+        <div class="fs-icon">📄</div>
+        <div class="fs-info">
+          <div class="fs-name">Aamaly File</div>
+          <div class="fs-total" id="fs-total-aamaly">0</div>
+          <div class="fs-detail" id="fs-detail-aamaly">— rows</div>
+          <div class="fs-bar">
+            <div class="fs-bar-matched"     id="fs-bar-a-matched"   style="width:0%"></div>
+            <div class="fs-bar-unmatched-a" id="fs-bar-a-unmatched" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="file-stat-card fahes">
+        <div class="fs-icon">📄</div>
+        <div class="fs-info">
+          <div class="fs-name">Fahes File</div>
+          <div class="fs-total" id="fs-total-fahes">0</div>
+          <div class="fs-detail" id="fs-detail-fahes">— rows</div>
+          <div class="fs-bar">
+            <div class="fs-bar-matched"     id="fs-bar-f-matched"   style="width:0%"></div>
+            <div class="fs-bar-unmatched-f" id="fs-bar-f-unmatched" style="width:0%"></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -607,6 +662,24 @@ function renderResults() {
   document.getElementById('pill-all').textContent      = allRows.length;
   document.getElementById('tagged-count').textContent  = tagged.length;
   document.getElementById('unmatched-count').textContent = unmatched.length;
+
+  // File totals
+  const totalA = dataAamaly.length;
+  const totalF = dataFahes.length;
+  const matchedA = matched.length; // rows from Aamaly that matched
+  const matchedF = matched.length; // rows from Fahes that matched (same count)
+  const pctAm = totalA ? Math.round(matchedA / totalA * 100) : 0;
+  const pctFm = totalF ? Math.round(matchedF / totalF * 100) : 0;
+
+  document.getElementById('fs-total-aamaly').textContent  = totalA.toLocaleString();
+  document.getElementById('fs-detail-aamaly').textContent = `${matchedA.toLocaleString()} matched · ${onlyA.length.toLocaleString()} unmatched · ${pctAm}% reconciled`;
+  document.getElementById('fs-bar-a-matched').style.width   = pctAm + '%';
+  document.getElementById('fs-bar-a-unmatched').style.width = (100 - pctAm) + '%';
+
+  document.getElementById('fs-total-fahes').textContent  = totalF.toLocaleString();
+  document.getElementById('fs-detail-fahes').textContent = `${matchedF.toLocaleString()} matched · ${onlyF.length.toLocaleString()} unmatched · ${pctFm}% reconciled`;
+  document.getElementById('fs-bar-f-matched').style.width   = pctFm + '%';
+  document.getElementById('fs-bar-f-unmatched').style.width = (100 - pctFm) + '%';
 
   document.getElementById('results').style.display        = 'block';
   document.getElementById('auto-suggest-btn').style.display = '';
