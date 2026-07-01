@@ -1028,60 +1028,63 @@ function fmtAmt(n) {
   return n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 }
 
-function renderBreakdown(unmatched, sumMatched, sumUnmatched, hasAmt) {
+function renderBreakdown(unmatched, _unused1, _unused2, hasAmt) {
   const el = document.getElementById('amt-breakdown');
   const body = document.getElementById('ab-body');
   if (!hasAmt) { el.style.display = 'none'; return; }
   el.style.display = '';
 
-  // Group unmatched by reason
+  // Compute all sums fresh from rowAmtGlobal so refunded = negative everywhere
+  const matched = allRows.filter(r => r.status === 'matched' || r.status === 'matched-diff');
+  const sumMatched = matched.reduce((s, r) => s + rowAmtGlobal(r), 0);
+
+  // Group unmatched by reason — refunded rows contribute negative amounts
   const reasonGroups = {};
   unmatched.forEach(r => {
     const label = r.reason || 'Untagged';
     if (!reasonGroups[label]) reasonGroups[label] = { count: 0, sum: 0 };
     reasonGroups[label].count++;
-    reasonGroups[label].sum += rowAmtGlobal(r);
+    reasonGroups[label].sum += rowAmtGlobal(r); // negative for Refunded
   });
 
+  // Grand total = matched + all unmatched (refunded already negative)
+  const sumUnmatched = unmatched.reduce((s, r) => s + rowAmtGlobal(r), 0);
   const totalAll = sumMatched + sumUnmatched;
+
+  // Use absolute value of matched as the base for % (so refund % makes sense)
+  const absBase = Math.abs(sumMatched) + unmatched.reduce((s, r) => s + Math.abs(rowAmtGlobal(r)), 0);
 
   let html = '';
 
   // ── Matched section ──
   html += `<div class="ab-section-head">Matched Transactions</div>`;
-  html += abRow('#16a34a', 'Matched', allRows.filter(r=>r.status==='matched'||r.status==='matched-diff').length, sumMatched, totalAll);
+  html += abRow('#16a34a', 'Matched', matched.length, sumMatched, absBase);
 
   // ── Unmatched by reason ──
-  html += `<div class="ab-section-head">Unmatched – by Reason</div>`;
+  html += `<div class="ab-section-head">Unmatched – by Reason (Refunded shown as negative)</div>`;
 
   const reasonOrder = ['Refunded','Duplicate','Pending','Timing Difference','Data Error','Under Review','Resolved','Other','Untagged'];
-  let unmatchedTotal = 0, unmatchedCount = 0;
 
   reasonOrder.forEach(rsn => {
     if (!reasonGroups[rsn]) return;
     const { count, sum } = reasonGroups[rsn];
-    const color = REASON_COLORS[rsn] || '#94a3b8';
-    html += abRow(color, rsn, count, sum, totalAll);
-    unmatchedTotal += sum;
-    unmatchedCount += count;
+    const color = rsn === 'Refunded' ? '#a855f7' : (REASON_COLORS[rsn] || '#94a3b8');
+    html += abRow(color, rsn, count, sum, absBase);
   });
 
-  // Any other reasons not in standard list
   Object.entries(reasonGroups).forEach(([rsn, { count, sum }]) => {
     if (reasonOrder.includes(rsn)) return;
-    html += abRow('#94a3b8', rsn, count, sum, totalAll);
-    unmatchedTotal += sum;
-    unmatchedCount += count;
+    html += abRow('#94a3b8', rsn, count, sum, absBase);
   });
 
-  // ── Grand total ──
-  html += `<div class="ab-section-head">Grand Total</div>`;
+  // ── Net total ──
+  html += `<div class="ab-section-head">Net Total (after deducting Refunded)</div>`;
   html += `<div class="ab-row ab-total">
     <span></span>
-    <span class="ab-label">All Transactions</span>
-    <span class="ab-count">${(allRows.length).toLocaleString()} rows</span>
-    <span class="ab-amt">${fmtAmt(totalAll)}</span>
-    <span class="ab-pct">100%</span>
+    <span class="ab-label">Net Amount</span>
+    <span class="ab-count">${allRows.length.toLocaleString()} rows</span>
+    <span class="ab-amt" style="color:${totalAll < 0 ? '#dc2626' : '#16a34a'}">${fmtAmt(totalAll)}</span>
+    <span class="ab-pct">—</span>
   </div>`;
 
   body.innerHTML = html;
