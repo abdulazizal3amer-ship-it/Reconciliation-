@@ -1065,17 +1065,41 @@ function renderBreakdown(unmatched, _unused1, _unused2, hasAmt) {
 
   // Group unmatched by reason — track pos/neg separately so Duplicates can show net=0
   const reasonGroups = {};
+  // First pass: collect rows per reason
+  const reasonRows = {};
   unmatched.forEach(r => {
     const label = r.reason || 'Untagged';
-    if (!reasonGroups[label]) reasonGroups[label] = { count: 0, pos: 0, neg: 0 };
-    const amt = rowAmtGlobal(r);
-    reasonGroups[label].count++;
-    if (amt >= 0) reasonGroups[label].pos += amt;
-    else          reasonGroups[label].neg += amt;
+    if (!reasonRows[label]) reasonRows[label] = [];
+    reasonRows[label].push(r);
   });
 
-  // Grand total = matched + all unmatched (refunded already negative)
-  const sumUnmatched = unmatched.reduce((s, r) => s + rowAmtGlobal(r), 0);
+  Object.entries(reasonRows).forEach(([label, rows]) => {
+    let pos = 0, neg = 0;
+    if (label === 'Duplicate') {
+      // Auto-pair: for each unique absolute amount, every pair cancels out (+/-)
+      // Remaining unpaired transactions count as positive
+      const amtBuckets = {};
+      rows.forEach(r => {
+        const raw = Math.abs(rowAmtGlobal(r));
+        amtBuckets[raw] = (amtBuckets[raw] || 0) + 1;
+      });
+      Object.entries(amtBuckets).forEach(([amt, cnt]) => {
+        const a = parseFloat(amt);
+        const pairs = Math.floor(cnt / 2);
+        pos += pairs * a + (cnt % 2) * a; // paired positive side + unpaired
+        neg -= pairs * a;                 // paired negative side
+      });
+    } else {
+      rows.forEach(r => {
+        const amt = rowAmtGlobal(r);
+        if (amt >= 0) pos += amt; else neg += amt;
+      });
+    }
+    reasonGroups[label] = { count: rows.length, pos, neg };
+  });
+
+  // Grand total = matched + all unmatched groups (Duplicates auto-paired)
+  const sumUnmatched = Object.values(reasonGroups).reduce((s, g) => s + g.pos + g.neg, 0);
   const totalAll = sumMatched + sumUnmatched;
 
   // Use absolute value of matched as the base for % (so refund % makes sense)
